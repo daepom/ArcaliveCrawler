@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcalive", "Arcalive\Arcalive\Arcalive.csproj", "{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcaliveForm", "ArcaliveForm\ArcaliveForm.csproj", "{A17C42AC-E332-495F-B1F0-113BD9785A89}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1163BB47-856B-447B-A3A5-3DC99117C260}
+	EndGlobalSection
+EndGlobal
