@@ -16,12 +16,7 @@ namespace ArcaliveForm
             InitializeComponent();
         }
 
-        public void WriteLog(object obj)
-        {
-            textBox2.AppendText(obj.ToString() + "\r\n");
-        }
-
-        void WriteLog2(object sender, EventArgs arg)
+        void WriteLog(object sender, EventArgs arg)
         {
             Invoke((Action)(() => {
                 textBox2.AppendText((arg as PrintCallbackArg).Str + "\r\n");
@@ -44,11 +39,12 @@ namespace ArcaliveForm
                 MessageBox.Show("채널 검색 결과가 없습니다.");
                 return;
             }
+
             Arcalive.Arcalive ac = new Arcalive.Arcalive(channel[0]);
             DateTime startDate = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
             DateTime endDate = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
 
-            ac.Print += WriteLog2;
+            ac.Print += WriteLog;
 
             List<Post> posts = new List<Post>();
             Task task = Task.Factory.StartNew(() =>
@@ -58,20 +54,27 @@ namespace ArcaliveForm
             await Task.WhenAll(task);
 
             string filename = string.Empty;
-            SaveFileDialog saveFile = new SaveFileDialog();
-            saveFile.DefaultExt = "dat";
+            SaveFileDialog saveFile = new SaveFileDialog
+            {
+                DefaultExt = "dat",
+                Title = "크롤링 데이터 파일을 어디에 저장할까요?"
+            };
             if (saveFile.ShowDialog() == DialogResult.OK)
             {
                 filename = saveFile.FileName;
             }
             else return;
             Arcalive.Arcalive.SerializationPosts(posts, filename);
+            MessageBox.Show("저장 완료");
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.DefaultExt = "dat";
+            OpenFileDialog openFile = new OpenFileDialog
+            {
+                DefaultExt = "dat",
+                Title = "크롤링 데이터 파일을 선택해주세요."
+            };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
                 var posts = Arcalive.Arcalive.DeserializationPosts(openFile.FileName);
@@ -103,14 +106,17 @@ namespace ArcaliveForm
                 {
                     txt += $"{dic.Key}, {dic.Value}\r\n";
                 }
-                txt += "\r\n//덧글\r\n";
+                txt += "\r\n//댓글\r\n";
                 foreach (var comment in commentsDesc)
                 {
                     txt += $"{comment.Key}, {comment.Value}\r\n";
                 }
 
-                SaveFileDialog saveFile = new SaveFileDialog();
-                saveFile.DefaultExt = "txt";
+                SaveFileDialog saveFile = new SaveFileDialog
+                {
+                    DefaultExt = "txt",
+                    Title = "텍스트 파일을 어디에 저장할까요?"
+                };
                 if (saveFile.ShowDialog() == DialogResult.OK)
                 {
                     File.WriteAllText(saveFile.FileName, txt);

@@ -14,19 +14,11 @@ namespace Arcalive
 {
     public class PrintCallbackArg : EventArgs
     {
-        private string str;
-
-        public string Str
-        {
-            get
-            {
-                return str;
-            }
-        }
+        public string Str { get; }
 
         public PrintCallbackArg(string callbackString)
         {
-            str = callbackString;
+            Str = callbackString;
         }
     }
 
