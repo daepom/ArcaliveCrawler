@@ -28,6 +28,8 @@ namespace Arcalive
     {
         public event EventHandler Print;
 
+        public event EventHandler DumpText;
+
         private string channelName = string.Empty;
 
         /// <summary>
@@ -132,13 +134,8 @@ namespace Arcalive
                     string sitesource = client.DownloadString(channelName + $"?p={page}");
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(sitesource);
-                    /*
-                     * 2020.12.29
-                     * "/html/body/div/div[2]/article/div/div[4]/div[2]/a"가
-                     * "/html/body/div/div[3]/article/div/div[4]/div[2]/a"로 바뀐거 확인
-                    */
-                    var test = doc.DocumentNode.SelectSingleNode("/html/body/div/div[3]/article");
-                    var posts = test.SelectNodes(".//div/div[4]/div[2]/a");
+
+                    var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
 
                     int i;
                     for (i = 0; i < posts.Count; i++)
@@ -207,50 +204,52 @@ namespace Arcalive
                 }
             }
 
-            //ChromeOptions options = new ChromeOptions();
-            //options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
+            /*
+            ChromeOptions options = new ChromeOptions();
+            options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
 
-            //using (ChromeDriver driver = new ChromeDriver(options))
-            //{
-            //    int page = 1;
-            //    while (gotoNextPage == true)
-            //    {
-            //        driver.Navigate().GoToUrl(channelName + $"?p={page}");
-            //        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(10);
-            //        driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            using (ChromeDriver driver = new ChromeDriver(options))
+            {
+                int page = 1;
+                while (gotoNextPage == true)
+                {
+                    driver.Navigate().GoToUrl(channelName + $"?p={page}");
+                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(10);
+                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
-            //        var posts = driver.FindElementByXPath("/html/body/div/div[2]/article/div/div[4]/div[2]")
-            //                          .FindElements(By.TagName("a"));
-            //        int i;
-            //        for (i = 0; i < posts.Count; i++)
-            //            if (posts[i].GetAttribute("class") == "vrow")
-            //                break; // 공지사항은 건너뛰기
-            //        for (; i < posts.Count; i++)
-            //        {
-            //            Post p = new Post();
-            //            p.link = posts[i].GetAttribute("href");
-            //            //var top = posts[i].FindElement(By.ClassName("vrow-top"));
-            //            //p.id = int.Parse(top.FindElement(By.ClassName("col-id")).Text);
-            //            //p.badge = top.FindElement(By.ClassName("col-title"))
-            //            //    .FindElement(By.ClassName("badge-success")).Text;
-            //            var bottom = posts[i].FindElement(By.ClassName("vrow-bottom"));
-            //            p.author = bottom.FindElement(By.ClassName("user-info")).Text;
-            //            p.time = DateTime.Parse(bottom.FindElement(By.TagName("time")).GetAttribute("datetime"));
-            //            results.Add(p);
+                    var posts = driver.FindElementByXPath("/html/body/div/div[2]/article/div/div[4]/div[2]")
+                                      .FindElements(By.TagName("a"));
+                    int i;
+                    for (i = 0; i < posts.Count; i++)
+                        if (posts[i].GetAttribute("class") == "vrow")
+                            break; // 공지사항은 건너뛰기
+                    for (; i < posts.Count; i++)
+                    {
+                        Post p = new Post();
+                        p.link = posts[i].GetAttribute("href");
+                        //var top = posts[i].FindElement(By.ClassName("vrow-top"));
+                        //p.id = int.Parse(top.FindElement(By.ClassName("col-id")).Text);
+                        //p.badge = top.FindElement(By.ClassName("col-title"))
+                        //    .FindElement(By.ClassName("badge-success")).Text;
+                        var bottom = posts[i].FindElement(By.ClassName("vrow-bottom"));
+                        p.author = bottom.FindElement(By.ClassName("user-info")).Text;
+                        p.time = DateTime.Parse(bottom.FindElement(By.TagName("time")).GetAttribute("datetime"));
+                        results.Add(p);
 
-            //            if (results.Last().time.Month >= 10)
-            //            {
-            //                gotoNextPage = true;
-            //            }
-            //            else
-            //            {
-            //                gotoNextPage = false;
-            //            }
-            //        }
+                        if (results.Last().time.Month >= 10)
+                        {
+                            gotoNextPage = true;
+                        }
+                        else
+                        {
+                            gotoNextPage = false;
+                        }
+                    }
 
-            //        page++;
-            //    }
-            //}
+                    page++;
+                }
+            }
+            */
 
             return results;
         }
@@ -265,18 +264,31 @@ namespace Arcalive
                 string sitesource = client.DownloadString(postLink);
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(sitesource);
-                var commentArea = doc.DocumentNode.SelectSingleNode("/html/body/div/div[3]");
-                var commentNum = commentArea.SelectSingleNode(".//article/div/div[2]/div[2]/div[2]/div[2]/span[8]");
+                var commentArea = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
+                // "//div[contains(@class, 'list-area')]"
+
+                var commentNum = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]/span[8]");
+
+                DumpText(this, new PrintCallbackArg(doc.DocumentNode.SelectSingleNode(
+                    "//div[contains(@class, 'fr-view article-content')]").InnerText));
+
                 if (int.Parse(commentNum.InnerText) == 0) return results; // 댓글이 없으면 스킵
 
-                var commentWrappers = commentArea.Descendants(0)
-                    .Where(n => n.HasClass("comment-wrapper"));
-                foreach (var commentWrapper in commentWrappers)
+                try
                 {
-                    Comment c = new Comment();
-                    var author = commentWrapper.SelectSingleNode(".//div[1]/div/div[1]/span").InnerText;
-                    c.author = author;
-                    results.Add(c);
+                    var commentWrappers = commentArea.Descendants(0)
+                    .Where(n => n.HasClass("comment-wrapper"));
+                    foreach (var commentWrapper in commentWrappers)
+                    {
+                        Comment c = new Comment();
+                        var author = commentWrapper.SelectSingleNode(".//div[1]/div/div[1]/span").InnerText;
+                        c.author = author;
+                        results.Add(c);
+                    }
+                }
+                catch
+                {
+                    // Do Nothing
                 }
 
                 return results;
@@ -310,7 +322,8 @@ namespace Arcalive
                     driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
                     var commentArea = driver.FindElementByXPath("/html/body/div/div[2]");
-
+                    // /html/body/div[1]/div[3]/article/div/div[2]/div[3]
+                    // /html/body/div[1]/div[3]/article/div/div[2]/div[5]/div[2]
                     var commentNum = commentArea.FindElement(By.XPath("/html/body/div/div[2]/article/div/div[2]/div[2]/div[2]/div[2]/span[8]"));
                     if (int.Parse(commentNum.Text) == 0) continue; // 댓글이 없으면 스킵
 
@@ -335,17 +348,20 @@ namespace Arcalive
 
         public static void SerializationPosts(List<Post> posts, string filename = "a.dat")
         {
-            Stream ws = new FileStream(filename, FileMode.Create);
-            BinaryFormatter binary = new BinaryFormatter();
-            binary.Serialize(ws, posts);
-            ws.Close();
+            using(Stream ws = new FileStream(filename, FileMode.Create))
+            {
+                BinaryFormatter binary = new BinaryFormatter();
+                binary.Serialize(ws, posts);
+            }
         }
 
         public static List<Post> DeserializationPosts(string filename = "a.dat")
         {
-            Stream rs = new FileStream(filename, FileMode.Open);
-            BinaryFormatter binary = new BinaryFormatter();
-            return (List<Post>)binary.Deserialize(rs);
+            using(Stream rs = new FileStream(filename, FileMode.Open))
+            {
+                BinaryFormatter binary = new BinaryFormatter();
+                return (List<Post>)binary.Deserialize(rs);
+            }
         }
     }
 
