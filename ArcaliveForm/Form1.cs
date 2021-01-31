@@ -1,9 +1,11 @@
 ﻿using Arcalive;
+using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,33 +14,53 @@ namespace ArcaliveForm
 {
     public partial class Form1 : Form
     {
+        private StringBuilder sb;
+
         public Form1()
         {
             InitializeComponent();
         }
 
-        void WriteLog(object sender, EventArgs arg)
+        private void Form1_Load(object sender, EventArgs e)
         {
-            Invoke((Action)(() => {
+            var currentRelease = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Text += " / " + currentRelease;
+
+            string html = string.Empty;
+            using (WebClient wc = new WebClient())
+            {
+                html = wc.DownloadString("https://github.com/tjgus1668/arcalivecrawler/releases");
+            }
+            HtmlAgilityPack.HtmlDocument hd = new HtmlAgilityPack.HtmlDocument();
+            hd.LoadHtml(html);
+            var releases = hd.DocumentNode.SelectNodes("//div[contains(@class, 'release-entry')]");
+            var latestRelease = releases[0].SelectSingleNode("//div[contains(@class, 'd-flex flex-items-start')]/div[1]/a").InnerText;
+
+            if (currentRelease == latestRelease) linkLabel1.Text = "최신 버전입니다.";
+            else linkLabel1.Text = "최신 버전 이용 가능.";
+        }
+
+        private void WriteLog(object sender, EventArgs arg)
+        {
+            Invoke((Action)(() =>
+            {
                 textBox2.AppendText((arg as PrintCallbackArg).Str + "\r\n");
             }));
         }
 
-        StringBuilder sb;
-        void DumpText(object sender, EventArgs arg)
+        private void DumpText(object sender, EventArgs arg)
         {
             Invoke((Action)(() =>
             {
-                if(checkBox1.Checked) sb.AppendLine((arg as PrintCallbackArg).Str);
+                if (checkBox1.Checked) sb.AppendLine((arg as PrintCallbackArg).Str);
             }));
         }
-
 
         // 크롤링
         private async void button1_ClickAsync(object sender, EventArgs e)
         {
             sb = new StringBuilder();
-            var channel = Arcalive.Arcalive.GetChannelLinks(channelNameTextBox.Text);
+            var channel = ArcaliveCrawler.GetChannelLinks(channelNameTextBox.Text);
             if (channel.Count > 1)
             {
                 MessageBox.Show("채널 검색 결과가 2개 이상입니다.");
@@ -51,7 +73,7 @@ namespace ArcaliveForm
                 return;
             }
 
-            Arcalive.Arcalive ac = new Arcalive.Arcalive(channel[0]);
+            ArcaliveCrawler ac = new ArcaliveCrawler(channel[0]);
             DateTime startDate = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
             DateTime endDate = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
 
@@ -61,7 +83,7 @@ namespace ArcaliveForm
             List<Post> posts = new List<Post>();
             Task task = Task.Factory.StartNew(() =>
             {
-                posts = ac.GetPosts(startDate, endDate, true, int.Parse(textBox1.Text));
+                posts = ac.GetPosts(startDate, endDate, checkBox3.Checked, int.Parse(textBox1.Text), checkBox2.Checked);
             });
             await Task.WhenAll(task);
 
@@ -76,7 +98,7 @@ namespace ArcaliveForm
                 filename = saveFile.FileName;
             }
             else return;
-            Arcalive.Arcalive.SerializationPosts(posts, filename);
+            ArcaliveCrawler.SerializationPosts(posts, filename);
             if (checkBox1.Checked == true)
             {
                 SaveFileDialog saveDump = new SaveFileDialog
@@ -101,7 +123,7 @@ namespace ArcaliveForm
             };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
-                var posts = Arcalive.Arcalive.DeserializationPosts(openFile.FileName);
+                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
 
                 Dictionary<string, int> postAuthor = new Dictionary<string, int>();
                 Dictionary<string, int> commentAuthor = new Dictionary<string, int>();
@@ -158,7 +180,7 @@ namespace ArcaliveForm
             };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
-                var posts = Arcalive.Arcalive.DeserializationPosts(openFile.FileName);
+                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
 
                 StringBuilder sb = new StringBuilder();
 
@@ -186,13 +208,13 @@ namespace ArcaliveForm
             };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
-                var posts = Arcalive.Arcalive.DeserializationPosts(openFile.FileName);
+                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
 
                 StringBuilder sb = new StringBuilder();
                 var timeDic = new Dictionary<string, int>();
                 var weekDic = new Dictionary<string, int>();
 
-                foreach(var post in posts)
+                foreach (var post in posts)
                 {
                     var hour = post.time.ToString("HH");
                     if (timeDic.ContainsKey(hour) == false)
@@ -210,17 +232,19 @@ namespace ArcaliveForm
                 }
 
                 var timeDicDesc = timeDic.OrderBy(x => x.Key);
-                var weekDicDesc = timeDic.OrderBy(x => x.Key);
 
-                foreach(var time in timeDicDesc)
+                foreach (var time in timeDicDesc)
                 {
                     sb.AppendLine($"{time.Key}, {time.Value}");
                 }
                 sb.AppendLine();
-                foreach(var week in weekDic)
-                {
-                    sb.AppendLine($"{week.Key}, {week.Value}");
-                }
+                sb.AppendLine($"일요일, {weekDic["Sunday"]}\r\n" +
+                    $"월요일, {weekDic["Monday"]}\r\n" +
+                    $"화요일, {weekDic["Tuesday"]}\r\n" +
+                    $"수요일, {weekDic["Wednesday"]}\r\n" +
+                    $"목요일, {weekDic["Thursday"]}\r\n" +
+                    $"금요일, {weekDic["Friday"]}\r\n" +
+                    $"토요일, {weekDic["Saturday"]}");
 
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
@@ -233,6 +257,11 @@ namespace ArcaliveForm
                 }
             }
             else return;
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/tjgus1668/ArcaliveCrawler/releases");
         }
     }
 }

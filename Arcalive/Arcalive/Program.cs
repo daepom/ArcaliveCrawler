@@ -1,6 +1,4 @@
 ﻿using HtmlAgilityPack;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +7,9 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Arcalive
 {
@@ -24,7 +25,7 @@ namespace Arcalive
 
     public delegate void PrintDelegate(object obj);
 
-    public partial class Arcalive
+    public partial class ArcaliveCrawler
     {
         public event EventHandler Print;
 
@@ -92,7 +93,7 @@ namespace Arcalive
             return result;
         }
 
-        public Arcalive(string channelName)
+        public ArcaliveCrawler(string channelName)
         {
             bool isFullLink = channelName.StartsWith("https://arca.live/b/");
             if (isFullLink)
@@ -114,7 +115,7 @@ namespace Arcalive
         /// <param name="readComments">댓글 작성자 등의 정보도 수집할까요? 주의: readComments를 true로 하면 파싱 속도가 급격히 느려짐</param>
         /// <param name="page">몇 페이지부터 읽을까요?</param>
         /// <returns></returns>
-        public List<Post> GetPosts(DateTime? from = null, DateTime? to = null, bool readComments = false, int page = 1)
+        public List<Post> GetPosts(DateTime? from = null, DateTime? to = null, bool readComments = false, int page = 1, bool crawlSlowly = true)
         {
             if (from == null) from = DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
             if (to == null) to = DateTime.Today;
@@ -128,9 +129,10 @@ namespace Arcalive
 
                 while (isEalierThanFrom == true)
                 {
-                    Print(this, new PrintCallbackArg($"Page: {page}"));
+                    Print?.Invoke(this, new PrintCallbackArg($"Page: {page}"));
                     // printDelegate($"Page: {page}");
 
+                    HttpClient client1 = new HttpClient();
                     string sitesource = client.DownloadString(channelName + $"?p={page}");
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(sitesource);
@@ -152,20 +154,21 @@ namespace Arcalive
                         p.time = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
                         if ((p.time < to) == false)
                         {
-                            Print(this, new PrintCallbackArg($"시간 범위에 맞지 않는 글은 스킵:  {p.time}"));
+                            Print?.Invoke(this, new PrintCallbackArg($"시간 범위에 맞지 않는 글은 스킵:  {p.time}"));
                             continue;
                         }
                         var postfix = posts[i].Attributes["href"].Value;
                         p.link = "https://arca.live" + postfix.Substring(0, postfix.LastIndexOf('?'));
-                        Print(this, new PrintCallbackArg(p.link));
+                        Print?.Invoke(this, new PrintCallbackArg(p.link));
                         if (results.Any(e => e.link == p.link))
                         {
-                            Print(this, new PrintCallbackArg("중복방지"));
+                            Print?.Invoke(this, new PrintCallbackArg("중복방지"));
                             continue;
                         }
                         if (readComments == true)
                         {
                             p.comments = GetComments(p.link);
+                            if (crawlSlowly == true ) Thread.Sleep(120);
                         }
                         else
                         {
@@ -201,6 +204,8 @@ namespace Arcalive
                     {
                         isEalierThanFrom = false;
                     }
+
+                    if (crawlSlowly == true && readComments == false) Thread.Sleep(120);
                 }
             }
 
@@ -269,14 +274,14 @@ namespace Arcalive
 
                 var commentNum = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]/span[8]");
 
-                DumpText(this, new PrintCallbackArg(doc.DocumentNode.SelectSingleNode(
+                DumpText?.Invoke(this, new PrintCallbackArg(doc.DocumentNode.SelectSingleNode(
                     "//div[contains(@class, 'fr-view article-content')]").InnerText));
 
                 if (int.Parse(commentNum.InnerText) == 0) return results; // 댓글이 없으면 스킵
 
                 try
                 {
-                    var commentWrappers = commentArea.Descendants(0)
+                    var commentWrappers = commentArea?.Descendants(0)
                     .Where(n => n.HasClass("comment-wrapper"));
                     foreach (var commentWrapper in commentWrappers)
                     {
@@ -288,7 +293,8 @@ namespace Arcalive
                 }
                 catch
                 {
-                    // Do Nothing
+                    // 댓글은 분명 없는데 commentNum.InnerText의
+                    // 값이 0이 아닌 경우가 있어서 try문을 씀
                 }
 
                 return results;
@@ -307,48 +313,9 @@ namespace Arcalive
             }
         }
 
-        public Dictionary<string, int> GetCommentss(List<Post> posts)
-        {
-            Dictionary<string, int> results = new Dictionary<string, int>();
-            ChromeOptions options = new ChromeOptions();
-            options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
-
-            using (ChromeDriver driver = new ChromeDriver(options))
-            {
-                foreach (var post in posts)
-                {
-                    driver.Navigate().GoToUrl(post.link);
-                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(10);
-                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-
-                    var commentArea = driver.FindElementByXPath("/html/body/div/div[2]");
-                    // /html/body/div[1]/div[3]/article/div/div[2]/div[3]
-                    // /html/body/div[1]/div[3]/article/div/div[2]/div[5]/div[2]
-                    var commentNum = commentArea.FindElement(By.XPath("/html/body/div/div[2]/article/div/div[2]/div[2]/div[2]/div[2]/span[8]"));
-                    if (int.Parse(commentNum.Text) == 0) continue; // 댓글이 없으면 스킵
-
-                    var commentWrappers = commentArea.FindElements(By.ClassName("comment-wrapper"));
-                    foreach (var commentWrapper in commentWrappers)
-                    {
-                        string username = commentWrapper.FindElement(By.ClassName("user-info")).Text;
-                        if (results.ContainsKey(username) == false)
-                        {
-                            results.Add(username, 1);
-                        }
-                        else
-                        {
-                            results[username]++;
-                        }
-                    }
-                }
-            }
-
-            return results;
-        }
-
         public static void SerializationPosts(List<Post> posts, string filename = "a.dat")
         {
-            using(Stream ws = new FileStream(filename, FileMode.Create))
+            using (Stream ws = new FileStream(filename, FileMode.Create))
             {
                 BinaryFormatter binary = new BinaryFormatter();
                 binary.Serialize(ws, posts);
@@ -357,7 +324,7 @@ namespace Arcalive
 
         public static List<Post> DeserializationPosts(string filename = "a.dat")
         {
-            using(Stream rs = new FileStream(filename, FileMode.Open))
+            using (Stream rs = new FileStream(filename, FileMode.Open))
             {
                 BinaryFormatter binary = new BinaryFormatter();
                 return (List<Post>)binary.Deserialize(rs);
@@ -385,8 +352,8 @@ namespace Arcalive
 
                     case 2:
                         Console.WriteLine("채널 이름을 입력해주세요.");
-                        var s = Arcalive.GetChannelLink(Console.ReadLine());
-                        Arcalive ac = new Arcalive(s);
+                        var s = ArcaliveCrawler.GetChannelLink(Console.ReadLine());
+                        ArcaliveCrawler ac = new ArcaliveCrawler(s);
                         DateTime d1 = new DateTime(2020, 11, 30, 23, 59, 59);
                         DateTime d2 = new DateTime(2020, 11, 1);
                         var posts = ac.GetPosts(d2, d1, true);
@@ -409,7 +376,7 @@ namespace Arcalive
                                 postAuthor[post.author]++;
                         }
 
-                        Arcalive.SerializationPosts(posts);
+                        ArcaliveCrawler.SerializationPosts(posts);
 
                         var paDesc = postAuthor.OrderByDescending(x => x.Value);
                         var commentsDesc = commentAuthor.OrderByDescending(x => x.Value);
