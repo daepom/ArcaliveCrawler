@@ -15,5 +15,6 @@ namespace Arcalive
         public int view;
         public int rate;
         public List<Comment> comments;
+        public string content;
     }
 }

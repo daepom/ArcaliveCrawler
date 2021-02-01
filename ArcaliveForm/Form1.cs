@@ -83,7 +83,9 @@ namespace ArcaliveForm
             List<Post> posts = new List<Post>();
             Task task = Task.Factory.StartNew(() =>
             {
-                posts = ac.GetPosts(startDate, endDate, checkBox3.Checked, int.Parse(textBox1.Text), checkBox2.Checked);
+                // posts = ac.GetPosts(startDate, endDate, checkBox3.Checked, int.Parse(textBox1.Text));
+                posts = ac.CrawlBoards(startDate, endDate, int.Parse(textBox1.Text));
+                posts = ac.CrawlPosts(posts);
             });
             await Task.WhenAll(task);
 
@@ -213,6 +215,7 @@ namespace ArcaliveForm
                 StringBuilder sb = new StringBuilder();
                 var timeDic = new Dictionary<string, int>();
                 var weekDic = new Dictionary<string, int>();
+                var dateDic = new Dictionary<string, int>();
 
                 foreach (var post in posts)
                 {
@@ -229,22 +232,32 @@ namespace ArcaliveForm
                         weekDic.Add(week.ToString(), 1);
                     }
                     else weekDic[week.ToString()]++;
+
+                    var date = post.time.Date.Day;
+                    if (dateDic.ContainsKey(date.ToString()) == false)
+                    {
+                        dateDic.Add(date.ToString(), 1);
+                    }
+                    else dateDic[date.ToString()]++;
                 }
 
                 var timeDicDesc = timeDic.OrderBy(x => x.Key);
+                var dateDicDesc = dateDic.OrderBy(x => x.Key);
 
                 foreach (var time in timeDicDesc)
                 {
                     sb.AppendLine($"{time.Key}, {time.Value}");
                 }
                 sb.AppendLine();
-                sb.AppendLine($"일요일, {weekDic["Sunday"]}\r\n" +
-                    $"월요일, {weekDic["Monday"]}\r\n" +
-                    $"화요일, {weekDic["Tuesday"]}\r\n" +
-                    $"수요일, {weekDic["Wednesday"]}\r\n" +
-                    $"목요일, {weekDic["Thursday"]}\r\n" +
-                    $"금요일, {weekDic["Friday"]}\r\n" +
-                    $"토요일, {weekDic["Saturday"]}");
+                foreach(var week in weekDic)
+                {
+                    sb.AppendLine($"{week.Key}, {week.Value}");
+                }
+                sb.AppendLine();
+                foreach (var date in dateDicDesc)
+                {
+                    sb.AppendLine($"{date.Key}, {date.Value}");
+                }
 
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
@@ -262,6 +275,34 @@ namespace ArcaliveForm
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/tjgus1668/ArcaliveCrawler/releases");
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog
+            {
+                DefaultExt = "dat",
+                Title = "크롤링 데이터 파일을 여러 개 선택해주세요.",
+                Multiselect = true
+            };
+            if(openFile.ShowDialog() == DialogResult.OK)
+            {
+                List<Post> CombinedPosts = new List<Post>();
+                foreach(var file in openFile.FileNames)
+                {
+                    CombinedPosts.AddRange(ArcaliveCrawler.DeserializationPosts(file));
+                }
+
+                SaveFileDialog saveFile = new SaveFileDialog
+                {
+                    DefaultExt = "dat",
+                    Title = "데이터 파일을 어디에 저장할까요?"
+                };
+                if (saveFile.ShowDialog() == DialogResult.OK)
+                {
+                    ArcaliveCrawler.SerializationPosts(CombinedPosts, saveFile.FileName);
+                }
+            }
         }
     }
 }

@@ -8,8 +8,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Arcalive
 {
@@ -23,13 +21,13 @@ namespace Arcalive
         }
     }
 
-    public delegate void PrintDelegate(object obj);
-
     public partial class ArcaliveCrawler
     {
         public event EventHandler Print;
 
         public event EventHandler DumpText;
+
+        public static int CallTimes { get; private set; }
 
         private string channelName = string.Empty;
 
@@ -104,17 +102,146 @@ namespace Arcalive
             {
                 this.channelName = "https://arca.live/b/" + channelName;
             }
+
+            CallTimes = 0;
         }
 
-        /// <summary>
-        /// 글을 크롤링합니다.
-        /// </summary>
-        /// <param name="from">이 시간 부터</param>
-        /// <param name="to">이 시간 까지</param>
-        /// <param name="printDelegate">중간중간 로그를 기록할 함수</param>
-        /// <param name="readComments">댓글 작성자 등의 정보도 수집할까요? 주의: readComments를 true로 하면 파싱 속도가 급격히 느려짐</param>
-        /// <param name="page">몇 페이지부터 읽을까요?</param>
-        /// <returns></returns>
+        private static HtmlDocument DownloadDoc(string link)
+        {
+            HtmlDocument doc = new HtmlDocument();
+            using (WebClient client = new WebClient() { Encoding = Encoding.UTF8 })
+            {
+                string siteSource = client.DownloadString(link);
+                doc.LoadHtml(siteSource);
+            }
+
+            // HTML 429 에러 방지용
+            // 100 이상으로 설정하는 것을 권장
+            Thread.Sleep(110);
+
+            return doc;
+        }
+
+        public List<Post> CrawlBoards(DateTime? From = null, DateTime? To = null, int startPage = 1)
+        {
+            if (From == null) From = DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
+            if (To == null) To = DateTime.Today;
+
+            int page = startPage;
+            List<Post> results = new List<Post>();
+
+            bool isEalierThanFrom = true;
+
+            while (isEalierThanFrom == true)
+            {
+                HtmlDocument doc = DownloadDoc(channelName + $"?p={page}");
+
+                Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++, 5} >> CrawlBoard >> Page: {page}"));
+
+                var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
+
+                int i;
+                for (i = 0; i < posts.Count; i++)
+                {
+                    if (posts[i].Attributes["class"].Value == "vrow")
+                        // 공지사항이 아닌 글이 나올 때까지 스킵
+                        break;
+                }
+                for (; i < posts.Count; i++)
+                {
+                    Post p = new Post();
+
+                    p.time = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
+
+                    if (p.time > To)
+                    {
+                        Print?.Invoke(this, new PrintCallbackArg($"시간 범위에 맞지 않는 글은 스킵:  {p.time}"));
+                        continue;
+                    }
+                    else if (p.time < From)
+                    {
+                        isEalierThanFrom = false;
+                        break;
+                    }
+
+                    var postfix = posts[i].Attributes["href"].Value;
+                    p.link = "https://arca.live" + postfix.Substring(0, postfix.LastIndexOf('?'));
+                    if (results.Any(e => e.link == p.link))
+                    {
+                        Print?.Invoke(this, new PrintCallbackArg("중복방지"));
+                        continue;
+                    }
+
+                    var commentNum = posts[i].SelectSingleNode(".//div[1]/span[2]/span[3]").InnerText;
+                    bool can = int.TryParse(Regex.Replace(commentNum, @"\D", ""), out int cap);
+                    p.comments = new List<Comment>(cap);
+
+                    p.id = int.Parse(posts[i].SelectSingleNode(".//div[1]/span[1]").InnerText);
+                    p.badge = posts[i].SelectSingleNode(".//div[1]/span[2]/span[1]").InnerText;
+                    p.title = posts[i].SelectSingleNode(".//div[1]/span[2]/span[2]").InnerText;
+                    p.author = posts[i].SelectSingleNode(".//div[2]/span[1]").InnerText;
+
+                    results.Add(p);
+                }
+                page++;
+            }
+
+            return results;
+        }
+
+        public List<Post> CrawlPosts(List<Post> Posts)
+        {
+            List<Post> results = new List<Post>();
+
+            for(int i = 0; i < Posts.Count; i++)
+            {
+                HtmlDocument doc = DownloadDoc(Posts[i].link);
+                Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++, 5} >> CrawlPosts >> {Posts[i].id}"));
+
+                Post newPost = new Post();
+                newPost = Posts[i];
+
+                var articleInfoNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]");
+                var commentAreaNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
+                var contentNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'fr-view article-content')]");
+
+                var commentNumNode = articleInfoNode.SelectSingleNode(".//span[8]");
+                var viewNumNode = articleInfoNode.SelectSingleNode(".//span[11]");
+
+                newPost.content = contentNode.InnerText;
+                newPost.view = int.Parse(viewNumNode.InnerText);
+
+                DumpText?.Invoke(this, new PrintCallbackArg(doc.DocumentNode.SelectSingleNode(
+                    "//div[contains(@class, 'fr-view article-content')]").InnerText));
+
+                if (int.Parse(commentNumNode.InnerText) == 0) continue; // 댓글이 없으면 스킵
+
+                List<Comment> comments = new List<Comment>();
+                try
+                {
+                    var commentWrappers = commentAreaNode?.Descendants(0)
+                    .Where(n => n.HasClass("comment-wrapper"));
+                    foreach (var commentWrapper in commentWrappers)
+                    {
+                        Comment c = new Comment();
+                        var author = commentWrapper.SelectSingleNode(".//div[1]/div/div[1]/span").InnerText;
+                        c.author = author;
+                        comments.Add(c);
+                    }
+                }
+                catch
+                {
+                    // 댓글은 분명 없는데 commentNum.InnerText의
+                    // 값이 0이 아닌 경우가 있어서 try/catch문을 씀
+                }
+                newPost.comments = comments;
+
+                results.Add(newPost);
+            }
+
+            return results;
+        }
+
         public List<Post> GetPosts(DateTime? from = null, DateTime? to = null, bool readComments = false, int page = 1, bool crawlSlowly = true)
         {
             if (from == null) from = DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
@@ -132,7 +259,6 @@ namespace Arcalive
                     Print?.Invoke(this, new PrintCallbackArg($"Page: {page}"));
                     // printDelegate($"Page: {page}");
 
-                    HttpClient client1 = new HttpClient();
                     string sitesource = client.DownloadString(channelName + $"?p={page}");
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(sitesource);
@@ -168,7 +294,7 @@ namespace Arcalive
                         if (readComments == true)
                         {
                             p.comments = GetComments(p.link);
-                            if (crawlSlowly == true ) Thread.Sleep(120);
+                            if (crawlSlowly == true) Thread.Sleep(120);
                         }
                         else
                         {
@@ -270,7 +396,6 @@ namespace Arcalive
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(sitesource);
                 var commentArea = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
-                // "//div[contains(@class, 'list-area')]"
 
                 var commentNum = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]/span[8]");
 

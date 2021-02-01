@@ -47,9 +47,9 @@
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.button5 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // channelNameTextBox
@@ -84,9 +84,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(10, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(368, 12);
+            this.label1.Size = new System.Drawing.Size(428, 12);
             this.label1.TabIndex = 4;
-            this.label1.Text = "1. 구분되는 채널 이름을 입력해주세요. (예: 유즈소프, SM, 미치쿠)";
+            this.label1.Text = "1. 구분되는 채널 이름을 입력해주세요. (예: 유즈소프트, SM반찬, 미치쿠사야)";
             // 
             // label2
             // 
@@ -221,24 +221,12 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // checkBox2
-            // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Checked = true;
-            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox2.Location = new System.Drawing.Point(324, 91);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(168, 16);
-            this.checkBox2.TabIndex = 20;
-            this.checkBox2.Text = "느리게 크롤링(1초에 하나)";
-            this.checkBox2.UseVisualStyleBackColor = true;
-            // 
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
             this.checkBox3.Checked = true;
             this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox3.Location = new System.Drawing.Point(324, 114);
+            this.checkBox3.Location = new System.Drawing.Point(324, 91);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(174, 16);
             this.checkBox3.TabIndex = 21;
@@ -256,14 +244,24 @@
             this.linkLabel1.Text = "Github";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(118, 287);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(100, 52);
+            this.button5.TabIndex = 23;
+            this.button5.Text = "데이터 파일 합치기";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(508, 450);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.checkBox3);
-            this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.checkBox1);
@@ -312,9 +310,9 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.Button button5;
     }
 }
 
