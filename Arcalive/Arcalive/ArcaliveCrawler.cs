@@ -96,13 +96,24 @@ namespace Arcalive
             CallTimes = 0;
         }
 
-        private static HtmlDocument DownloadDoc(string link)
+        private HtmlDocument DownloadDoc(string link)
         {
             HtmlDocument doc = new HtmlDocument();
             using (WebClient client = new WebClient() { Encoding = Encoding.UTF8 })
             {
-                string siteSource = client.DownloadString(link);
-                doc.LoadHtml(siteSource);
+                string siteSource = string.Empty;
+                try
+                {
+                    siteSource = client.DownloadString(link);
+                }
+                catch (Exception)
+                {
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML 403 Error"));
+                }
+                finally
+                {
+                    doc.LoadHtml(siteSource);
+                }
             }
 
             // HTML 429 에러 방지용
@@ -145,7 +156,7 @@ namespace Arcalive
 
                     if (p.time > To)
                     {
-                        Print?.Invoke(this, new PrintCallbackArg($"시간 범위에 맞지 않는 글은 스킵:  {p.time}"));
+                        Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++, 5} >> CrawlBoard >> Skip Post"));
                         continue;
                     }
                     else if (p.time < From)
@@ -187,6 +198,11 @@ namespace Arcalive
             {
                 if (skip.Any(x => x == Posts[i].badge)) continue;
                 HtmlDocument doc = DownloadDoc(Posts[i].link);
+                if (string.IsNullOrEmpty(doc.Text))
+                {
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlPosts >> Skip Post"));
+                    continue;
+                }
                 Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlPosts >> {Posts[i].id}"));
 
                 Post newPost = new Post();
