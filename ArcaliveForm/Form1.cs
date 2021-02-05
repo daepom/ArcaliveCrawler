@@ -80,12 +80,15 @@ namespace ArcaliveForm
             ac.DumpText += DumpText;
             ac.Print += WriteLog;
 
+            var str = textBox3.Text.Split(',');
+            var skip = str.ToList();
+
             List<Post> posts = new List<Post>();
             Task task = Task.Factory.StartNew(() =>
             {
                 // posts = ac.GetPosts(startDate, endDate, checkBox3.Checked, int.Parse(textBox1.Text));
                 posts = ac.CrawlBoards(startDate, endDate, int.Parse(textBox1.Text));
-                posts = ac.CrawlPosts(posts);
+                posts = ac.CrawlPosts(posts, skip);
             });
             await Task.WhenAll(task);
 
@@ -303,6 +306,60 @@ namespace ArcaliveForm
                     ArcaliveCrawler.SerializationPosts(CombinedPosts, saveFile.FileName);
                 }
             }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog
+            {
+                DefaultExt = "dat",
+                Title = "크롤링 데이터 파일을 선택해주세요."
+            };
+            if (openFile.ShowDialog() == DialogResult.OK)
+            {
+                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
+
+                Dictionary<string, int> arcaconDic = new Dictionary<string, int>();
+                foreach (var post in posts)
+                {
+                    foreach (var comment in post.comments)
+                    {
+                        if (string.IsNullOrEmpty(comment.arcacon)) continue;
+
+                        else if (arcaconDic.ContainsKey(comment.arcacon) == false)
+                            arcaconDic.Add(comment.arcacon, 1);
+                        else
+                            arcaconDic[comment.arcacon]++;
+                    }
+                }
+                var arcaconDicDesc = arcaconDic.OrderBy(x => x.Value);
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.Append("//아카콘 랭킹\r\n");
+                foreach (var dic in arcaconDicDesc)
+                {
+                    sb.Append($"{dic.Key}, {dic.Value}\r\n");
+                }
+
+                SaveFileDialog saveFile = new SaveFileDialog
+                {
+                    DefaultExt = "txt",
+                    Title = "텍스트 파일을 어디에 저장할까요?"
+                };
+                if (saveFile.ShowDialog() == DialogResult.OK)
+                {
+                    File.WriteAllText(saveFile.FileName, sb.ToString());
+                }
+            }
+            else return;
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            DataFileSplitForm form = new DataFileSplitForm();
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.Show();
         }
     }
 }
