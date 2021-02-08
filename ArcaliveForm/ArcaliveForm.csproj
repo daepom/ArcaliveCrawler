@@ -55,6 +55,16 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="RankExportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RankExportForm.Designer.cs">
+      <DependentUpon>RankExportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Ranking.cs" />
+    <EmbeddedResource Include="RankExportForm.resx">
+      <DependentUpon>RankExportForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <Compile Include="DataFileSplitForm.cs">
       <SubType>Form</SubType>

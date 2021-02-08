@@ -49,7 +49,7 @@ namespace Arcalive
                                 postAuthor[post.author]++;
                         }
 
-                        ArcaliveCrawler.SerializationPosts(posts);
+                        ArcaliveCrawler.SerializePosts(posts);
 
                         var paDesc = postAuthor.OrderByDescending(x => x.Value);
                         var commentsDesc = commentAuthor.OrderByDescending(x => x.Value);

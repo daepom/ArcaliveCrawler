@@ -86,6 +86,7 @@
     <Compile Include="Post.cs" />
     <Compile Include="PrintCallbackArg.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProgressPagesCallBack.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

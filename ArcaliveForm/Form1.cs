@@ -1,5 +1,4 @@
 ﻿using Arcalive;
-using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -56,29 +55,41 @@ namespace ArcaliveForm
             }));
         }
 
+        private void UpdateCrawlProgress(object sender, EventArgs arg)
+        {
+            Invoke((Action)(() =>
+            {
+                int currentPage = (arg as ProgressPagesCallBack).CurrentPage,
+                    totalPages = (arg as ProgressPagesCallBack).TotalPages;
+                label9.Text = $"{currentPage} / {totalPages}";
+            }));
+        }
+
         // 크롤링
         private async void button1_ClickAsync(object sender, EventArgs e)
         {
             sb = new StringBuilder();
-            var channel = ArcaliveCrawler.GetChannelLinks(channelNameTextBox.Text);
-            if (channel.Count > 1)
-            {
-                MessageBox.Show("채널 검색 결과가 2개 이상입니다.");
-                return;
-                // TODO: 리스트 띄우고 설정창
-            }
-            else if (channel.Count == 0)
-            {
-                MessageBox.Show("채널 검색 결과가 없습니다.");
-                return;
-            }
 
-            ArcaliveCrawler ac = new ArcaliveCrawler(channel[0]);
+            //var channel = ArcaliveCrawler.GetChannelLinks(channelNameTextBox.Text);
+            //if (channel.Count > 1)
+            //{
+            //    MessageBox.Show("채널 검색 결과가 2개 이상입니다.");
+            //    return;
+            //    // TODO: 리스트 띄우고 설정창
+            //}
+            //else if (channel.Count == 0)
+            //{
+            //    MessageBox.Show("채널 검색 결과가 없습니다.");
+            //    return;
+            //}
+
+            ArcaliveCrawler ac = new ArcaliveCrawler(channelNameTextBox.Text);
             DateTime startDate = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
             DateTime endDate = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
 
             ac.DumpText += DumpText;
             ac.Print += WriteLog;
+            ac.GetCrawlingProgress += UpdateCrawlProgress;
 
             var str = textBox3.Text.Split(',');
             var skip = str.ToList();
@@ -103,7 +114,7 @@ namespace ArcaliveForm
                 filename = saveFile.FileName;
             }
             else return;
-            ArcaliveCrawler.SerializationPosts(posts, filename);
+            ArcaliveCrawler.SerializePosts(posts, filename);
             if (checkBox1.Checked == true)
             {
                 SaveFileDialog saveDump = new SaveFileDialog
@@ -121,59 +132,11 @@ namespace ArcaliveForm
 
         private void button2_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFile = new OpenFileDialog
+            RankExportForm rankExportForm = new RankExportForm
             {
-                DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요."
+                StartPosition = FormStartPosition.CenterParent
             };
-            if (openFile.ShowDialog() == DialogResult.OK)
-            {
-                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
-
-                Dictionary<string, int> postAuthor = new Dictionary<string, int>();
-                Dictionary<string, int> commentAuthor = new Dictionary<string, int>();
-                foreach (var post in posts)
-                {
-                    foreach (var comment in post.comments)
-                    {
-                        if (commentAuthor.ContainsKey(comment.author) == false)
-                            commentAuthor.Add(comment.author, 1);
-                        else
-                            commentAuthor[comment.author]++;
-                    }
-
-                    if (postAuthor.ContainsKey(post.author) == false)
-                        postAuthor.Add(post.author, 1);
-                    else
-                        postAuthor[post.author]++;
-                }
-                var paDesc = postAuthor.OrderByDescending(x => x.Value);
-                var commentsDesc = commentAuthor.OrderByDescending(x => x.Value);
-
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append("//글\r\n");
-                foreach (var dic in paDesc)
-                {
-                    sb.Append($"{dic.Key}, {dic.Value}\r\n");
-                }
-                sb.Append("\r\n//댓글\r\n");
-                foreach (var comment in commentsDesc)
-                {
-                    sb.Append($"{comment.Key}, {comment.Value}\r\n");
-                }
-
-                SaveFileDialog saveFile = new SaveFileDialog
-                {
-                    DefaultExt = "txt",
-                    Title = "텍스트 파일을 어디에 저장할까요?"
-                };
-                if (saveFile.ShowDialog() == DialogResult.OK)
-                {
-                    File.WriteAllText(saveFile.FileName, sb.ToString());
-                }
-            }
-            else return;
+            rankExportForm.ShowDialog();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -181,11 +144,12 @@ namespace ArcaliveForm
             OpenFileDialog openFile = new OpenFileDialog
             {
                 DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요."
+                Title = "크롤링 데이터 파일을 선택해주세요.",
+                Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
             };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
-                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
+                var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
 
                 StringBuilder sb = new StringBuilder();
 
@@ -194,7 +158,8 @@ namespace ArcaliveForm
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
                     DefaultExt = "txt",
-                    Title = "텍스트 파일을 어디에 저장할까요?"
+                    Title = "텍스트 파일을 어디에 저장할까요?",
+                    Filter = "텍스트 파일 (*.txt)|*.txt"
                 };
                 if (saveFile.ShowDialog() == DialogResult.OK)
                 {
@@ -209,11 +174,12 @@ namespace ArcaliveForm
             OpenFileDialog openFile = new OpenFileDialog
             {
                 DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요."
+                Title = "크롤링 데이터 파일을 선택해주세요.",
+                Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
             };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
-                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
+                var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
 
                 StringBuilder sb = new StringBuilder();
                 var timeDic = new Dictionary<string, int>();
@@ -252,7 +218,7 @@ namespace ArcaliveForm
                     sb.AppendLine($"{time.Key}, {time.Value}");
                 }
                 sb.AppendLine();
-                foreach(var week in weekDic)
+                foreach (var week in weekDic)
                 {
                     sb.AppendLine($"{week.Key}, {week.Value}");
                 }
@@ -265,7 +231,8 @@ namespace ArcaliveForm
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
                     DefaultExt = "txt",
-                    Title = "텍스트 파일을 어디에 저장할까요?"
+                    Title = "텍스트 파일을 어디에 저장할까요?",
+                    Filter = "텍스트 파일 (*.txt)|*.txt"
                 };
                 if (saveFile.ShowDialog() == DialogResult.OK)
                 {
@@ -286,80 +253,35 @@ namespace ArcaliveForm
             {
                 DefaultExt = "dat",
                 Title = "크롤링 데이터 파일을 여러 개 선택해주세요.",
-                Multiselect = true
+                Multiselect = true,
+                Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
             };
-            if(openFile.ShowDialog() == DialogResult.OK)
+            if (openFile.ShowDialog() == DialogResult.OK)
             {
                 List<Post> CombinedPosts = new List<Post>();
-                foreach(var file in openFile.FileNames)
+                foreach (var file in openFile.FileNames)
                 {
-                    CombinedPosts.AddRange(ArcaliveCrawler.DeserializationPosts(file));
+                    CombinedPosts.AddRange(ArcaliveCrawler.DeserializePosts(file));
                 }
 
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
                     DefaultExt = "dat",
-                    Title = "데이터 파일을 어디에 저장할까요?"
+                    Title = "데이터 파일을 어디에 저장할까요?",
+                    Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
                 };
                 if (saveFile.ShowDialog() == DialogResult.OK)
                 {
-                    ArcaliveCrawler.SerializationPosts(CombinedPosts, saveFile.FileName);
+                    ArcaliveCrawler.SerializePosts(CombinedPosts, saveFile.FileName);
                 }
             }
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFile = new OpenFileDialog
-            {
-                DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요."
-            };
-            if (openFile.ShowDialog() == DialogResult.OK)
-            {
-                var posts = ArcaliveCrawler.DeserializationPosts(openFile.FileName);
-
-                Dictionary<string, int> arcaconDic = new Dictionary<string, int>();
-                foreach (var post in posts)
-                {
-                    foreach (var comment in post.comments)
-                    {
-                        if (string.IsNullOrEmpty(comment.arcacon)) continue;
-
-                        else if (arcaconDic.ContainsKey(comment.arcacon) == false)
-                            arcaconDic.Add(comment.arcacon, 1);
-                        else
-                            arcaconDic[comment.arcacon]++;
-                    }
-                }
-                var arcaconDicDesc = arcaconDic.OrderBy(x => x.Value);
-
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append("//아카콘 랭킹\r\n");
-                foreach (var dic in arcaconDicDesc)
-                {
-                    sb.Append($"{dic.Key}, {dic.Value}\r\n");
-                }
-
-                SaveFileDialog saveFile = new SaveFileDialog
-                {
-                    DefaultExt = "txt",
-                    Title = "텍스트 파일을 어디에 저장할까요?"
-                };
-                if (saveFile.ShowDialog() == DialogResult.OK)
-                {
-                    File.WriteAllText(saveFile.FileName, sb.ToString());
-                }
-            }
-            else return;
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
             DataFileSplitForm form = new DataFileSplitForm();
             form.StartPosition = FormStartPosition.CenterParent;
-            form.Show();
+            form.ShowDialog();
         }
     }
 }

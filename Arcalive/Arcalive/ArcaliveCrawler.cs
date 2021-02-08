@@ -17,6 +17,8 @@ namespace Arcalive
 
         public event EventHandler DumpText;
 
+        public event EventHandler GetCrawlingProgress;
+
         public static int CallTimes { get; private set; }
 
         private string channelName = string.Empty;
@@ -156,7 +158,7 @@ namespace Arcalive
 
                     if (p.time > To)
                     {
-                        Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++, 5} >> CrawlBoard >> Skip Post"));
+                        Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlBoard >> Skip Post"));
                         continue;
                     }
                     else if (p.time < From)
@@ -196,7 +198,7 @@ namespace Arcalive
 
             for (int i = 0; i < Posts.Count; i++)
             {
-                if (skip.Any(x => x == Posts[i].badge)) continue;
+                if (skip.Any(x => (x == Posts[i].badge) && x != string.Empty)) continue;
                 HtmlDocument doc = DownloadDoc(Posts[i].link);
                 if (string.IsNullOrEmpty(doc.Text))
                 {
@@ -204,6 +206,7 @@ namespace Arcalive
                     continue;
                 }
                 Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlPosts >> {Posts[i].id}"));
+                GetCrawlingProgress?.Invoke(this, new ProgressPagesCallBack(i + 1, Posts.Count));
 
                 Post newPost = new Post();
                 newPost = Posts[i];
@@ -452,7 +455,7 @@ namespace Arcalive
             }
         }
 
-        public static void SerializationPosts(List<Post> posts, string filename = "a.dat")
+        public static void SerializePosts(List<Post> posts, string filename = "a.dat")
         {
             using (Stream ws = new FileStream(filename, FileMode.Create))
             {
@@ -461,7 +464,7 @@ namespace Arcalive
             }
         }
 
-        public static List<Post> DeserializationPosts(string filename = "a.dat")
+        public static List<Post> DeserializePosts(string filename = "a.dat")
         {
             using (Stream rs = new FileStream(filename, FileMode.Open))
             {

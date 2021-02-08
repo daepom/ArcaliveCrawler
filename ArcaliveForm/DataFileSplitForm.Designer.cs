@@ -46,15 +46,16 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(13, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(137, 12);
+            this.label1.Size = new System.Drawing.Size(177, 12);
             this.label1.TabIndex = 1;
-            this.label1.Text = "자를 날짜를 선택하세요.";
+            this.label1.Text = "분리할 기준 날짜를 선택하세요.";
             // 
             // dateTimePicker2
             // 
             this.dateTimePicker2.Format = System.Windows.Forms.DateTimePickerFormat.Time;
             this.dateTimePicker2.Location = new System.Drawing.Point(12, 57);
             this.dateTimePicker2.Name = "dateTimePicker2";
+            this.dateTimePicker2.ShowUpDown = true;
             this.dateTimePicker2.Size = new System.Drawing.Size(97, 21);
             this.dateTimePicker2.TabIndex = 2;
             // 
@@ -64,7 +65,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 3;
-            this.button1.Text = "자르기!";
+            this.button1.Text = "분리하기!";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -78,7 +79,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.dateTimePicker1);
             this.Name = "DataFileSplitForm";
-            this.Text = "Form2";
+            this.Text = "데이터 파일 자르기";
             this.ResumeLayout(false);
             this.PerformLayout();
 
