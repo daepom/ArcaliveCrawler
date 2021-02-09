@@ -9,6 +9,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
+//TODO 아카콘 댓글 비율
+
 namespace Arcalive
 {
     public partial class ArcaliveCrawler
@@ -108,9 +110,10 @@ namespace Arcalive
                 {
                     siteSource = client.DownloadString(link);
                 }
-                catch (Exception)
+                catch (WebException e)
                 {
-                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML 403 Error"));
+                    int statusCode = (int)(e.Response as HttpWebResponse).StatusCode;
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML {statusCode} Error"));
                 }
                 finally
                 {
@@ -139,6 +142,9 @@ namespace Arcalive
             {
                 HtmlDocument doc = DownloadDoc(channelName + $"?p={page}");
 
+                if (string.IsNullOrEmpty(doc.Text))
+                    return results;
+
                 Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlBoard >> Page: {page}"));
 
                 var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
@@ -156,12 +162,12 @@ namespace Arcalive
 
                     p.time = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
 
-                    if (p.time > To)
+                    if (p.time >= To)
                     {
                         Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlBoard >> Skip Post"));
                         continue;
                     }
-                    else if (p.time < From)
+                    else if (p.time <= From)
                     {
                         isEalierThanFrom = false;
                         break;

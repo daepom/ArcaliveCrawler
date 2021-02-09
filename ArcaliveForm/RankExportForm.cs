@@ -11,6 +11,8 @@ namespace ArcaliveForm
 {
     public partial class RankExportForm : Form
     {
+        private List<Post> DataFile;
+
         public RankExportForm()
         {
             InitializeComponent();
@@ -46,6 +48,7 @@ namespace ArcaliveForm
             }
             return result;
         }
+
         private void SaveTextFile(string str)
         {
             if (comboBox1.SelectedIndex == 0)
@@ -82,19 +85,12 @@ namespace ArcaliveForm
             }
         }
 
+        // 갤창 랭킹
         private void button1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFile = new OpenFileDialog
-            {
-                DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요.",
-                Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
-            };
-            if (openFile.ShowDialog() != DialogResult.OK) return;
+            var posts = DataFile;
 
-            var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
-            
-            if(checkBox1.Checked == true)
+            if (checkBox1.Checked == true)
             {
                 DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
                 DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
@@ -132,17 +128,10 @@ namespace ArcaliveForm
             SaveTextFile(sb.ToString());
         }
 
+        // 시간별
         private void button2_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFile = new OpenFileDialog
-            {
-                DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요.",
-                Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
-            };
-            if (openFile.ShowDialog() != DialogResult.OK) return;
-
-            var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
+            var posts = DataFile;
 
             if (checkBox1.Checked == true)
             {
@@ -205,7 +194,46 @@ namespace ArcaliveForm
             SaveTextFile(sb.ToString());
         }
 
+        // 아카콘 랭킹
         private void button3_Click(object sender, EventArgs e)
+        {
+            var posts = DataFile;
+
+            if (checkBox1.Checked == true)
+            {
+                DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
+                DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
+                posts = LimitPostsByTime(posts, startTime, endTime);
+            }
+
+            Dictionary<string, int> arcaconDic = new Dictionary<string, int>();
+            foreach (var post in posts)
+            {
+                foreach (var comment in post.comments)
+                {
+                    if (string.IsNullOrEmpty(comment.arcacon)) continue;
+                    else if (arcaconDic.ContainsKey(comment.arcacon) == false)
+                        arcaconDic.Add(comment.arcacon, 1);
+                    else
+                        arcaconDic[comment.arcacon]++;
+                }
+            }
+            var arcaconDicDesc = arcaconDic.OrderByDescending(x => x.Value);
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("//아카콘 랭킹");
+            sb.AppendLine($"총 댓글 / 아카콘 = {posts.Sum(x => x.comments.Count)} / {arcaconDicDesc.Sum(x => x.Value)}");
+            sb.AppendLine("아카콘 링크, 사용 횟수");
+            foreach (var dic in arcaconDicDesc)
+            {
+                sb.AppendLine($"{"https:" + dic.Key}, {dic.Value}");
+            }
+
+            SaveTextFile(sb.ToString());
+        }
+
+        private void FileChooseButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog
             {
@@ -215,41 +243,23 @@ namespace ArcaliveForm
             };
             if (openFile.ShowDialog() == DialogResult.OK)
             {
-                var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
-
-                if (checkBox1.Checked == true)
-                {
-                    DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
-                    DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
-                    posts = LimitPostsByTime(posts, startTime, endTime);
-                }
-
-                Dictionary<string, int> arcaconDic = new Dictionary<string, int>();
-                foreach (var post in posts)
-                {
-                    foreach (var comment in post.comments)
-                    {
-                        if (string.IsNullOrEmpty(comment.arcacon)) continue;
-
-                        else if (arcaconDic.ContainsKey(comment.arcacon) == false)
-                            arcaconDic.Add(comment.arcacon, 1);
-                        else
-                            arcaconDic[comment.arcacon]++;
-                    }
-                }
-                var arcaconDicDesc = arcaconDic.OrderByDescending(x => x.Value);
-
-                StringBuilder sb = new StringBuilder();
-
-                sb.Append("//아카콘 랭킹\r\n");
-                foreach (var dic in arcaconDicDesc)
-                {
-                    sb.Append($"{"https:" + dic.Key}, {dic.Value}\r\n");
-                }
-
-                SaveTextFile(sb.ToString());
+                DataFile = ArcaliveCrawler.DeserializePosts(openFile.FileName);
+                textBox1.Text = openFile.FileName;
+                dateTimePicker1.Value = dateTimePicker2.Value =DataFile.Last().time;
+                dateTimePicker3.Value = dateTimePicker4.Value = DataFile.First().time;
             }
-            else return;
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if(checkBox2.Checked == true)
+            {
+                textBox2.Enabled = true;
+            }
+            else
+            {
+                textBox2.Enabled = false;
+            }
         }
     }
 }

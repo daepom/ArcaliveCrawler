@@ -47,14 +47,6 @@ namespace ArcaliveForm
             }));
         }
 
-        private void DumpText(object sender, EventArgs arg)
-        {
-            Invoke((Action)(() =>
-            {
-                if (checkBox1.Checked) sb.AppendLine((arg as PrintCallbackArg).Str);
-            }));
-        }
-
         private void UpdateCrawlProgress(object sender, EventArgs arg)
         {
             Invoke((Action)(() =>
@@ -69,6 +61,8 @@ namespace ArcaliveForm
         private async void button1_ClickAsync(object sender, EventArgs e)
         {
             sb = new StringBuilder();
+            textBox2.Text = string.Empty;
+            label9.Text = "0 / 0";
 
             //var channel = ArcaliveCrawler.GetChannelLinks(channelNameTextBox.Text);
             //if (channel.Count > 1)
@@ -83,11 +77,16 @@ namespace ArcaliveForm
             //    return;
             //}
 
+            if (string.IsNullOrEmpty(channelNameTextBox.Text))
+            {
+                MessageBox.Show("채널 url을 입력해주세요.");
+                return;
+            }
+
             ArcaliveCrawler ac = new ArcaliveCrawler(channelNameTextBox.Text);
             DateTime startDate = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
             DateTime endDate = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
 
-            ac.DumpText += DumpText;
             ac.Print += WriteLog;
             ac.GetCrawlingProgress += UpdateCrawlProgress;
 
@@ -115,18 +114,6 @@ namespace ArcaliveForm
             }
             else return;
             ArcaliveCrawler.SerializePosts(posts, filename);
-            if (checkBox1.Checked == true)
-            {
-                SaveFileDialog saveDump = new SaveFileDialog
-                {
-                    DefaultExt = "txt",
-                    Title = "덤프 파일을 어디에 저장할까요?"
-                };
-                if (saveDump.ShowDialog() == DialogResult.OK)
-                {
-                    File.WriteAllText(saveDump.FileName, sb.ToString());
-                }
-            }
             MessageBox.Show("저장 완료");
         }
 
