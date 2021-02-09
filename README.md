@@ -14,9 +14,8 @@
 갤창랭킹을 출력하는 등의 작업을 하기 전에, 크롤링이란 작업이 필요합니다.
 * 크롤링 데이터 파일 출력 방법
   * 1과 2를 적절하게 입력하고 조절합니다.
-  * 오른쪽 체크박스 옵션들은 무슨 의미인지 모른다면, 되도록 건들지 않는 것이 좋습니다.
   * 준비가 됐으면 '크롤링!' 버튼을 클릭합니다.
-  * 크롤링에는 오랜 시간이 소요됩니다. (한 달치의 경우 1~3시간 정도)
+  * 크롤링에는 오랜 시간이 소요됩니다. (한 달치의 경우 1~4시간 정도)
   * 크롤링이 완료되면 데이터 파일을 원하는 곳에 저장합니다.
 * 크롤링 데이터 파일 사용 방법
   * 3에 있는 기능들 중, 원하는 기능을 클릭합니다.
@@ -48,12 +47,9 @@
     
 크롤링한 결과를 직렬화 하는 예시:
 
-    ArcaliveCrawler.SerializationPosts(posts, filename);
+    ArcaliveCrawler.SerializenPosts(posts, filename);
     
 저장된 .dat 파일을 역직렬화 하는 예시:
 
-    var posts = ArcaliveCrawler.DeserializationPosts(fileName);
+    var posts = ArcaliveCrawler.DeserializenPosts(fileName);
 
-
-제공되는 이벤트는 현재 "Print"와 "DumpText"입니다.\
-둘은 "EventArg"로 "PrintCallbackArg"를 사용하며 .Str으로 전달되는 값에 접근할 수 있습니다.
