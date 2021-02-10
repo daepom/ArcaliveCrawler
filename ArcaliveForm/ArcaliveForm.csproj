@@ -92,6 +92,14 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="OptionsCallBack.cs" />
+    <Compile Include="OptionsClass.cs" />
+    <Compile Include="OptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OptionsForm.Designer.cs">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -104,6 +112,9 @@
       <DependentUpon>RankExportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Ranking.cs" />
+    <EmbeddedResource Include="OptionsForm.resx">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="RankExportForm.resx">
       <DependentUpon>RankExportForm.cs</DependentUpon>
     </EmbeddedResource>

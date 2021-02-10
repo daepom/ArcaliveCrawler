@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,7 +14,7 @@ using System.Threading;
 
 namespace Arcalive
 {
-    public partial class ArcaliveCrawler
+    public partial class ArcaliveCrawler : IBaseCrawler<Post>
     {
         public event EventHandler Print;
 
@@ -100,34 +101,6 @@ namespace Arcalive
             CallTimes = 0;
         }
 
-        private HtmlDocument DownloadDoc(string link)
-        {
-            HtmlDocument doc = new HtmlDocument();
-            using (WebClient client = new WebClient() { Encoding = Encoding.UTF8 })
-            {
-                string siteSource = string.Empty;
-                try
-                {
-                    siteSource = client.DownloadString(link);
-                }
-                catch (WebException e)
-                {
-                    int statusCode = (int)(e.Response as HttpWebResponse).StatusCode;
-                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML {statusCode} Error"));
-                }
-                finally
-                {
-                    doc.LoadHtml(siteSource);
-                }
-            }
-
-            // HTML 429 에러 방지용
-            // 100 이상으로 설정하는 것을 권장
-            Thread.Sleep(110);
-
-            return doc;
-        }
-
         public List<Post> CrawlBoards(DateTime? From = null, DateTime? To = null, int startPage = 1)
         {
             if (From == null) From = DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
@@ -204,6 +177,9 @@ namespace Arcalive
 
             for (int i = 0; i < Posts.Count; i++)
             {
+                Stopwatch sp = new Stopwatch();
+                sp.Start();
+
                 if (skip.Any(x => (x == Posts[i].badge) && x != string.Empty)) continue;
                 HtmlDocument doc = DownloadDoc(Posts[i].link);
                 if (string.IsNullOrEmpty(doc.Text))
@@ -212,7 +188,6 @@ namespace Arcalive
                     continue;
                 }
                 Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlPosts >> {Posts[i].id}"));
-                GetCrawlingProgress?.Invoke(this, new ProgressPagesCallBack(i + 1, Posts.Count));
 
                 Post newPost = new Post();
                 newPost = Posts[i];
@@ -244,9 +219,20 @@ namespace Arcalive
                         if (commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]") != null)
                         {
                             var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]").Attributes["src"].Value;
-                            c.arcacon = arcacon;
+                            c.content = arcacon;
+                            c.isArcacon = true;
                         }
-                        else c.arcacon = string.Empty;
+                        else if (commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]") != null)
+                        {
+                            var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]").Attributes["src"].Value;
+                            c.content = arcacon;
+                            c.isArcacon = true;
+                        }
+                        else
+                        {
+                            c.content = commentWrapper.SelectSingleNode(".//div/div[2]/div").InnerText;
+                            c.isArcacon = false;
+                        }
                         c.author = author;
                         //c.arcacon = arcacon;
                         comments.Add(c);
@@ -260,205 +246,65 @@ namespace Arcalive
                 newPost.comments = comments;
 
                 results.Add(newPost);
+                sp.Stop();
+                GetCrawlingProgress?.Invoke(this, new ProgressPagesCallBack(i + 1, Posts.Count, (int)sp.Elapsed.TotalMilliseconds));
             }
 
             return results;
         }
 
-        public List<Post> GetPosts(DateTime? from = null, DateTime? to = null, bool readComments = false, int page = 1, bool crawlSlowly = true)
+        public int FindStartPage(DateTime TargetTime, int StartPage = 1, int MaxPage = 10000)
         {
-            if (from == null) from = DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
-            if (to == null) to = DateTime.Today;
+            DateTime TimeofFirstPost, TimeofLastPost;
+            bool isPageFound = false;
+            int currentPage = -1;
 
-            List<Post> results = new List<Post>();
+            Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> FindStartPage >> Finding..."));
 
-            using (WebClient client = new WebClient())
+            while (isPageFound == false)
             {
-                client.Encoding = Encoding.UTF8;
-                bool isEalierThanFrom = true;
+                currentPage = (StartPage + MaxPage) / 2;
 
-                while (isEalierThanFrom == true)
+                HtmlDocument doc = DownloadDoc(channelName + $"?p={currentPage}");
+                if (string.IsNullOrEmpty(doc.Text))
+                    return -1;
+
+                var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
+
+                if (posts.Count <= 1)
                 {
-                    Print?.Invoke(this, new PrintCallbackArg($"Page: {page}"));
-                    // printDelegate($"Page: {page}");
+                    // 글이 없음 =
+                    MaxPage = currentPage;
+                    continue;
+                }
 
-                    string sitesource = client.DownloadString(channelName + $"?p={page}");
-                    HtmlDocument doc = new HtmlDocument();
-                    doc.LoadHtml(sitesource);
+                int i;
+                for (i = 0; i < posts.Count; i++)
+                {
+                    if (posts[i].Attributes["class"].Value == "vrow")
+                        // 공지사항이 아닌 글이 나올 때까지 스킵
+                        break;
+                }
+                TimeofFirstPost = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
+                TimeofLastPost = DateTime.Parse(posts[posts.Count - 1].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
 
-                    var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
-
-                    int i;
-                    for (i = 0; i < posts.Count; i++)
-                    {
-                        if (posts[i].Attributes["class"].Value == "vrow")
-                        {
-                            break; // 공지사항은 건너뛰기
-                        }
-                    }
-                    for (; i < posts.Count; i++)
-                    {
-                        Post p = new Post();
-
-                        p.time = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
-                        if ((p.time < to) == false)
-                        {
-                            Print?.Invoke(this, new PrintCallbackArg($"시간 범위에 맞지 않는 글은 스킵:  {p.time}"));
-                            continue;
-                        }
-                        var postfix = posts[i].Attributes["href"].Value;
-                        p.link = "https://arca.live" + postfix.Substring(0, postfix.LastIndexOf('?'));
-                        Print?.Invoke(this, new PrintCallbackArg(p.link));
-                        if (results.Any(e => e.link == p.link))
-                        {
-                            Print?.Invoke(this, new PrintCallbackArg("중복방지"));
-                            continue;
-                        }
-                        if (readComments == true)
-                        {
-                            p.comments = GetComments(p.link);
-                            if (crawlSlowly == true) Thread.Sleep(120);
-                        }
-                        else
-                        {
-                            var str = posts[i].SelectSingleNode(".//div[1]/span[2]/span[3]").InnerText;
-                            int cap = new int();
-                            bool can = int.TryParse(Regex.Replace(str, @"\D", ""), out cap);
-                            p.comments = new List<Comment>(cap);
-                        }
-
-                        p.id = int.Parse(posts[i].SelectSingleNode(".//div[1]/span[1]").InnerText);
-                        p.badge = posts[i].SelectSingleNode(".//div[1]/span[2]/span[1]").InnerText;
-                        p.title = posts[i].SelectSingleNode(".//div[1]/span[2]/span[2]").InnerText;
-                        p.author = posts[i].SelectSingleNode(".//div[2]/span[1]").InnerText;
-
-                        results.Add(p);
-                        //Post p = new Post();
-                        //p.link = "https://arca.live" + posts[i].Attributes["href"].Value;
-                        //var top = posts[i].Descendants("div").First();
-                        //var bottom = posts[i].Descendants("div").ToList()[1];
-                        //p.id = int.Parse(top.Descendants("span").First().InnerText);
-                        //var col_title = top.Descendants("span").ToList()[2].Descendants("span");
-                        //p.badge = col_title.ToList()[0].InnerText;
-                        //p.title = col_title.ToList()[1].InnerText;
-                        //p.author = bottom.Descendants("span").ToList()[0].InnerText;
-                        //Console.WriteLine(bottom.Descendants("span").ToList()[2].InnerText);
-                    }
-                    page++;
-                    if (results.Count == 0 || results.Last().time >= from)
-                    {
-                        isEalierThanFrom = true;
-                    }
-                    else
-                    {
-                        isEalierThanFrom = false;
-                    }
-
-                    if (crawlSlowly == true && readComments == false) Thread.Sleep(120);
+                if (TargetTime >= TimeofLastPost && TargetTime <= TimeofFirstPost)
+                {
+                    isPageFound = true;
+                }
+                else if (TargetTime >= TimeofLastPost)
+                {
+                    MaxPage = currentPage;
+                }
+                else
+                {
+                    StartPage = currentPage;
                 }
             }
 
-            /*
-            ChromeOptions options = new ChromeOptions();
-            options.AddUserProfilePreference("profile.default_content_setting_values.images", 2);
+            Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> FindStartPage >> Found!"));
 
-            using (ChromeDriver driver = new ChromeDriver(options))
-            {
-                int page = 1;
-                while (gotoNextPage == true)
-                {
-                    driver.Navigate().GoToUrl(channelName + $"?p={page}");
-                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(10);
-                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-
-                    var posts = driver.FindElementByXPath("/html/body/div/div[2]/article/div/div[4]/div[2]")
-                                      .FindElements(By.TagName("a"));
-                    int i;
-                    for (i = 0; i < posts.Count; i++)
-                        if (posts[i].GetAttribute("class") == "vrow")
-                            break; // 공지사항은 건너뛰기
-                    for (; i < posts.Count; i++)
-                    {
-                        Post p = new Post();
-                        p.link = posts[i].GetAttribute("href");
-                        //var top = posts[i].FindElement(By.ClassName("vrow-top"));
-                        //p.id = int.Parse(top.FindElement(By.ClassName("col-id")).Text);
-                        //p.badge = top.FindElement(By.ClassName("col-title"))
-                        //    .FindElement(By.ClassName("badge-success")).Text;
-                        var bottom = posts[i].FindElement(By.ClassName("vrow-bottom"));
-                        p.author = bottom.FindElement(By.ClassName("user-info")).Text;
-                        p.time = DateTime.Parse(bottom.FindElement(By.TagName("time")).GetAttribute("datetime"));
-                        results.Add(p);
-
-                        if (results.Last().time.Month >= 10)
-                        {
-                            gotoNextPage = true;
-                        }
-                        else
-                        {
-                            gotoNextPage = false;
-                        }
-                    }
-
-                    page++;
-                }
-            }
-            */
-
-            return results;
-        }
-
-        public List<Comment> GetComments(string postLink)
-        {
-            List<Comment> results = new List<Comment>();
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                string sitesource = client.DownloadString(postLink);
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(sitesource);
-                var commentArea = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
-
-                var commentNum = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]/span[8]");
-
-                DumpText?.Invoke(this, new PrintCallbackArg(doc.DocumentNode.SelectSingleNode(
-                    "//div[contains(@class, 'fr-view article-content')]").InnerText));
-
-                if (int.Parse(commentNum.InnerText) == 0) return results; // 댓글이 없으면 스킵
-
-                try
-                {
-                    var commentWrappers = commentArea?.Descendants(0)
-                    .Where(n => n.HasClass("comment-wrapper"));
-                    foreach (var commentWrapper in commentWrappers)
-                    {
-                        Comment c = new Comment();
-                        var author = commentWrapper.SelectSingleNode(".//div[1]/div/div[1]/span").InnerText;
-                        c.author = author;
-                        results.Add(c);
-                    }
-                }
-                catch
-                {
-                    // 댓글은 분명 없는데 commentNum.InnerText의
-                    // 값이 0이 아닌 경우가 있어서 try문을 씀
-                }
-
-                return results;
-
-                //var channels = doc.DocumentNode.SelectNodes("/html/body/div/div[2]/article/div[2]/div");
-                //foreach (var channel in channels)
-                //{
-                //    var channelName = channel.Descendants("a").First().InnerText;
-                //    if (channelName.Contains(keyword))
-                //    {
-                //        var address = channel.Descendants("a").First().Attributes["href"].Value;
-                //        result = "https://arca.live" + address;
-                //        return result;
-                //    }
-                //}
-            }
+            return currentPage;
         }
 
         public static void SerializePosts(List<Post> posts, string filename = "a.dat")

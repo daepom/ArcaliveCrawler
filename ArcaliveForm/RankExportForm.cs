@@ -211,11 +211,11 @@ namespace ArcaliveForm
             {
                 foreach (var comment in post.comments)
                 {
-                    if (string.IsNullOrEmpty(comment.arcacon)) continue;
-                    else if (arcaconDic.ContainsKey(comment.arcacon) == false)
-                        arcaconDic.Add(comment.arcacon, 1);
+                    if (comment.isArcacon != true) continue;
+                    else if (arcaconDic.ContainsKey(comment.content) == false)
+                        arcaconDic.Add(comment.content, 1);
                     else
-                        arcaconDic[comment.arcacon]++;
+                        arcaconDic[comment.content]++;
                 }
             }
             var arcaconDicDesc = arcaconDic.OrderByDescending(x => x.Value);

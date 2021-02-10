@@ -10,6 +10,7 @@ namespace Arcalive
     public struct Comment
     {
         public string author;
-        public string arcacon;
+        public bool isArcacon;
+        public string content;
     }
 }

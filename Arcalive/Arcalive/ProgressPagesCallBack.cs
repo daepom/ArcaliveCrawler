@@ -11,10 +11,13 @@ namespace Arcalive
         public int CurrentPage { get; }
         public int TotalPages { get; }
 
-        public ProgressPagesCallBack(int currentPage, int totalPages)
+        public int Time { get; }
+
+        public ProgressPagesCallBack(int currentPage, int totalPages, int time = 0)
         {
             CurrentPage = currentPage;
             TotalPages = totalPages;
+            Time = time;
         }
     }
 }

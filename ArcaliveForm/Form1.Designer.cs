@@ -40,20 +40,16 @@
             this.dateTimePicker3 = new System.Windows.Forms.DateTimePicker();
             this.dateTimePicker4 = new System.Windows.Forms.DateTimePicker();
             this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.button3 = new System.Windows.Forms.Button();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.button5 = new System.Windows.Forms.Button();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
             this.button7 = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.divider1 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
+            this.OptionsFormShowButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // channelNameTextBox
@@ -161,23 +157,6 @@
             this.label5.TabIndex = 12;
             this.label5.Text = "3. 원하는 기능을 선택해주세요.";
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(174, 174);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(259, 12);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "선택사항: 몇 페이지부터 크롤링을 시작할까요?";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(176, 191);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 21);
-            this.textBox1.TabIndex = 14;
-            this.textBox1.Text = "1";
-            // 
             // textBox2
             // 
             this.textBox2.Location = new System.Drawing.Point(249, 299);
@@ -205,18 +184,6 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // checkBox3
-            // 
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Checked = true;
-            this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox3.Location = new System.Drawing.Point(176, 256);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(174, 16);
-            this.checkBox3.TabIndex = 21;
-            this.checkBox3.Text = "댓글도 크롤링(매우 느려짐)";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            // 
             // linkLabel1
             // 
             this.linkLabel1.AutoSize = true;
@@ -237,23 +204,6 @@
             this.button5.Text = "데이터 파일 합치기";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // textBox3
-            // 
-            this.textBox3.Location = new System.Drawing.Point(176, 229);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(100, 21);
-            this.textBox3.TabIndex = 24;
-            this.textBox3.Text = "신문고,";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(174, 214);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(290, 12);
-            this.label8.TabIndex = 25;
-            this.label8.Text = "선택사항: 크롤링 스킵할 태그(띄어쓰기x, \',\'로 구분)";
             // 
             // button7
             // 
@@ -290,25 +240,31 @@
             this.label10.Size = new System.Drawing.Size(235, 2);
             this.label10.TabIndex = 30;
             // 
+            // OptionsFormShowButton
+            // 
+            this.OptionsFormShowButton.Location = new System.Drawing.Point(120, 215);
+            this.OptionsFormShowButton.Name = "OptionsFormShowButton";
+            this.OptionsFormShowButton.Size = new System.Drawing.Size(127, 52);
+            this.OptionsFormShowButton.TabIndex = 31;
+            this.OptionsFormShowButton.Text = "세부 설정";
+            this.OptionsFormShowButton.UseVisualStyleBackColor = true;
+            this.OptionsFormShowButton.Click += new System.EventHandler(this.OptionsFormShowButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(500, 572);
+            this.Controls.Add(this.OptionsFormShowButton);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.divider1);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.button7);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.textBox3);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.dateTimePicker4);
             this.Controls.Add(this.dateTimePicker3);
@@ -343,20 +299,16 @@
         private System.Windows.Forms.DateTimePicker dateTimePicker3;
         private System.Windows.Forms.DateTimePicker dateTimePicker4;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label divider1;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button OptionsFormShowButton;
     }
 }
 

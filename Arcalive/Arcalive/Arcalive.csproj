@@ -82,6 +82,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArcaliveCrawler.cs" />
+    <Compile Include="ArcaliveCrawler.DownloadDoc.cs" />
+    <Compile Include="IBaseCrawler.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="Post.cs" />
     <Compile Include="PrintCallbackArg.cs" />

@@ -14,6 +14,7 @@ namespace ArcaliveForm
     public partial class Form1 : Form
     {
         private StringBuilder sb;
+        public OptionsClass Options { get; set; }
 
         public Form1()
         {
@@ -24,6 +25,12 @@ namespace ArcaliveForm
         {
             var currentRelease = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             Text += " / " + currentRelease;
+            Options = new OptionsClass()
+            {
+                StartPageFinding = 1,
+                StartPage = 1,
+                SkippingTags = new List<string> { "신문고" }
+            };
 
             string html = string.Empty;
             using (WebClient wc = new WebClient())
@@ -53,8 +60,15 @@ namespace ArcaliveForm
             {
                 int currentPage = (arg as ProgressPagesCallBack).CurrentPage,
                     totalPages = (arg as ProgressPagesCallBack).TotalPages;
-                label9.Text = $"{currentPage} / {totalPages}";
+                double time = (double)(arg as ProgressPagesCallBack).Time / 1000;
+
+                label9.Text = $"{currentPage} / {totalPages}, {Math.Round((totalPages - currentPage) * time, 1)}초 남음";
             }));
+        }
+
+        public void UpdateOptions(object sender, EventArgs arg)
+        {
+            Options = (arg as OptionsCallBack).Options;
         }
 
         // 크롤링
@@ -90,14 +104,17 @@ namespace ArcaliveForm
             ac.Print += WriteLog;
             ac.GetCrawlingProgress += UpdateCrawlProgress;
 
-            var str = textBox3.Text.Split(',');
-            var skip = str.ToList();
+            var skip = Options.SkippingTags;
 
             List<Post> posts = new List<Post>();
             Task task = Task.Factory.StartNew(() =>
             {
-                // posts = ac.GetPosts(startDate, endDate, checkBox3.Checked, int.Parse(textBox1.Text));
-                posts = ac.CrawlBoards(startDate, endDate, int.Parse(textBox1.Text));
+                int startPage = 1;
+                if (Options.StartPageFinding == 2)
+                    startPage = ac.FindStartPage(endDate);
+                else
+                    startPage = Options.StartPage;
+                posts = ac.CrawlBoards(startDate, endDate, startPage);
                 posts = ac.CrawlPosts(posts, skip);
             });
             await Task.WhenAll(task);
@@ -269,6 +286,15 @@ namespace ArcaliveForm
             DataFileSplitForm form = new DataFileSplitForm();
             form.StartPosition = FormStartPosition.CenterParent;
             form.ShowDialog();
+        }
+
+        private void OptionsFormShowButton_Click(object sender, EventArgs e)
+        {
+            OptionsForm options = new OptionsForm();
+            options.StartPosition = FormStartPosition.CenterParent;
+            options.OptionsCallBack += UpdateOptions;
+            options.Owner = this;
+            options.ShowDialog();
         }
     }
 }
