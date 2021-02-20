@@ -26,7 +26,7 @@
 
 **개발자용 설명서**
 
-프로젝트의 소스코드를 다운받아, Arcalive 폴더를 작업하는 프로젝트에 참조로 추가합니다.\
+프로그램에 있는 Arcalive.dll을 작업하는 프로젝트에 참조로 추가합니다.\
 생성자 사용 예시:
 
     ArcaliveCrawler ac = new ArcaliveCrawler("yuzusoft");
@@ -47,9 +47,9 @@
     
 크롤링한 결과를 직렬화 하는 예시:
 
-    ArcaliveCrawler.SerializenPosts(posts, filename);
+    ArcaliveCrawler.SerializePosts(posts, filename);
     
 저장된 .dat 파일을 역직렬화 하는 예시:
 
-    var posts = ArcaliveCrawler.DeserializenPosts(fileName);
+    var posts = ArcaliveCrawler.DeserializePosts(fileName);
 
