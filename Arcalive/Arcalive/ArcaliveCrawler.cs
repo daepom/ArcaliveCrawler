@@ -225,6 +225,8 @@ namespace Arcalive
                         else if (commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]") != null)
                         {
                             var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]").Attributes["src"].Value;
+                            if (arcacon.EndsWith(".mp4"))
+                                arcacon += ".gif";
                             c.content = arcacon;
                             c.isArcacon = true;
                         }
