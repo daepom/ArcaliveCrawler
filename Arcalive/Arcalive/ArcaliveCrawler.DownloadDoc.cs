@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using System;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -7,9 +8,12 @@ namespace Arcalive
 {
     public partial class ArcaliveCrawler
     {
-        private HtmlDocument DownloadDoc(
-            string link, string userAgent = "live.arca.android/0.8.207", int term = 0)
+        public const string ArcaliveUserAgent = "live.arca.android/0.8.214";
+
+        public HtmlDocument DownloadDoc(
+            string link, string userAgent = ArcaliveUserAgent, int term = 0)
         {
+
             HtmlDocument doc = new HtmlDocument();
             using (WebClient client = new WebClient() { Encoding = Encoding.UTF8 })
             {

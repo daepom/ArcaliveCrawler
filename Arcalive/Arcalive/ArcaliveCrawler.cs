@@ -193,7 +193,7 @@ namespace Arcalive
                 newPost = Posts[i];
 
                 var articleInfoNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]");
-                var commentAreaNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
+                
                 var contentNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'fr-view article-content')]");
 
                 var commentNumNode = articleInfoNode.SelectSingleNode(".//span[8]");
@@ -207,45 +207,26 @@ namespace Arcalive
 
                 if (int.Parse(commentNumNode.InnerText) == 0) continue; // 댓글이 없으면 스킵
 
-                List<Comment> comments = new List<Comment>();
-                try
+                // 댓글이 50개를 넘어가 페이지가 분리될 경우
+                if(doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'pagination-wrapper my-2')]") != null)
                 {
-                    var commentWrappers = commentAreaNode?.Descendants(0)
-                    .Where(n => n.HasClass("comment-item"));
-                    foreach (var commentWrapper in commentWrappers)
+                    int maxCommentPageNumber = int.Parse(doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'pagination-wrapper my-2')]/ul/li[contains(@class, 'page-item active')]/a").InnerText);
+                    List<Comment> comments = new List<Comment>();
+                    var commentAreaNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
+                    comments.AddRange(ParseComments(commentAreaNode));
+                    for (int k = maxCommentPageNumber - 1; k >= 1; k--)
                     {
-                        Comment c = new Comment();
-                        var author = commentWrapper.SelectSingleNode(".//div/div[1]/span").InnerText;
-                        if (commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]") != null)
-                        {
-                            var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]").Attributes["src"].Value;
-                            c.content = arcacon;
-                            c.isArcacon = true;
-                        }
-                        else if (commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]") != null)
-                        {
-                            var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]").Attributes["src"].Value;
-                            if (arcacon.EndsWith(".mp4"))
-                                arcacon += ".gif";
-                            c.content = arcacon;
-                            c.isArcacon = true;
-                        }
-                        else
-                        {
-                            c.content = commentWrapper.SelectSingleNode(".//div/div[2]/div").InnerText;
-                            c.isArcacon = false;
-                        }
-                        c.author = author;
-                        //c.arcacon = arcacon;
-                        comments.Add(c);
+                        HtmlDocument commentDoc = DownloadDoc(newPost.link + "?cp=" + k);
+                        commentAreaNode = commentDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
+                        comments.AddRange(ParseComments(commentAreaNode));
                     }
+                    newPost.comments = comments;
                 }
-                catch
+                else
                 {
-                    // 댓글은 분명 없는데 commentNum.InnerText의
-                    // 값이 0이 아닌 경우가 있어서 try/catch문을 씀
+                    var commentAreaNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'list-area')]");
+                    newPost.comments = ParseComments(commentAreaNode);
                 }
-                newPost.comments = comments;
 
                 results.Add(newPost);
                 sp.Stop();
@@ -253,6 +234,52 @@ namespace Arcalive
             }
 
             return results;
+        }
+
+        private List<Comment> ParseComments(HtmlNode commentAreaNode)
+        {
+            List<Comment> comments = new List<Comment>();
+
+            try
+            {
+                var commentWrappers = commentAreaNode?.Descendants(0)
+                .Where(n => n.HasClass("comment-item"));
+                Console.WriteLine(commentWrappers.Count());
+                foreach (var commentWrapper in commentWrappers)
+                {
+                    Comment c = new Comment();
+                    var author = commentWrapper.SelectSingleNode(".//div/div[1]/span").InnerText;
+                    if (commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]") != null)
+                    {
+                        var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]").Attributes["src"].Value;
+                        c.content = arcacon;
+                        c.isArcacon = true;
+                    }
+                    else if (commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]") != null)
+                    {
+                        var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]").Attributes["src"].Value;
+                        if (arcacon.EndsWith(".mp4"))
+                            arcacon += ".gif";
+                        c.content = arcacon;
+                        c.isArcacon = true;
+                    }
+                    else
+                    {
+                        c.content = commentWrapper.SelectSingleNode(".//div/div[2]/div").InnerText;
+                        c.isArcacon = false;
+                    }
+                    c.author = author;
+                    //c.arcacon = arcacon;
+                    comments.Add(c);
+                }
+            }
+            catch
+            {
+                // 댓글은 분명 없는데 commentNum.InnerText의
+                // 값이 0이 아닌 경우가 있어서 try/catch문을 씀
+            }
+
+            return comments;
         }
 
         public int FindStartPage(DateTime TargetTime, int StartPage = 1, int MaxPage = 10000)
@@ -271,11 +298,12 @@ namespace Arcalive
                 if (string.IsNullOrEmpty(doc.Text))
                     return -1;
 
+                
                 var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
 
                 if (posts.Count <= 1)
                 {
-                    // 글이 없음 =
+                    // 글이 없을 조건 1
                     MaxPage = currentPage;
                     continue;
                 }
@@ -287,6 +315,15 @@ namespace Arcalive
                         // 공지사항이 아닌 글이 나올 때까지 스킵
                         break;
                 }
+
+
+                if(i == posts.Count)
+                {
+                    // 글이 없을 조건 2
+                    MaxPage = currentPage;
+                    continue;
+                }
+
                 TimeofFirstPost = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
                 TimeofLastPost = DateTime.Parse(posts[posts.Count - 1].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
 

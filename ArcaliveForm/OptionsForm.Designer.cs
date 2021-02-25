@@ -68,10 +68,10 @@
             this.PFABinaryRadioButton.AutoSize = true;
             this.PFABinaryRadioButton.Location = new System.Drawing.Point(7, 44);
             this.PFABinaryRadioButton.Name = "PFABinaryRadioButton";
-            this.PFABinaryRadioButton.Size = new System.Drawing.Size(123, 16);
+            this.PFABinaryRadioButton.Size = new System.Drawing.Size(161, 16);
             this.PFABinaryRadioButton.TabIndex = 1;
             this.PFABinaryRadioButton.TabStop = true;
-            this.PFABinaryRadioButton.Text = "이진탐색 알고리즘";
+            this.PFABinaryRadioButton.Text = "이진탐색 알고리즘 (권장)";
             this.PFABinaryRadioButton.UseVisualStyleBackColor = true;
             // 
             // PFASetPageButton

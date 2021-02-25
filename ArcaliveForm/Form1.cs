@@ -111,7 +111,9 @@ namespace ArcaliveForm
             {
                 int startPage = 1;
                 if (Options.StartPageFinding == 2)
+                {
                     startPage = ac.FindStartPage(endDate);
+                }
                 else
                     startPage = Options.StartPage;
                 posts = ac.CrawlBoards(startDate, endDate, startPage);
