@@ -11,7 +11,28 @@ namespace ArcaliveForm
 {
     public partial class RankExportForm : Form
     {
-        private List<Post> DataFile;
+        private List<Post> datafile;
+
+        public List<Post> DataFile
+        {
+            get
+            {
+                var posts = datafile;
+
+                if (checkBox1.Checked == true)
+                {
+                    DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
+                    DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
+                    posts = LimitPostsByTime(posts, startTime, endTime);
+                }
+
+                return posts;
+            }
+            set
+            {
+                datafile = value;
+            }
+        }
 
         public RankExportForm()
         {
@@ -90,39 +111,88 @@ namespace ArcaliveForm
         {
             var posts = DataFile;
 
-            if (checkBox1.Checked == true)
-            {
-                DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
-                DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
-                posts = LimitPostsByTime(posts, startTime, endTime);
-            }
-
             Dictionary<string, Ranking> RankDic = new Dictionary<string, Ranking>();
+            Dictionary<string, double> PlayTimeDic = new Dictionary<string, double>();
+            Dictionary<string, List<DateTime>> TimeByUsersDic = new Dictionary<string, List<DateTime>>();
+            Dictionary<string, List<DateTime>> TimeByUsersDicDesc = new Dictionary<string, List<DateTime>>();
             foreach (var post in posts)
             {
                 foreach (var comment in post.comments)
                 {
                     if (RankDic.ContainsKey(comment.author) == false)
-                        RankDic.Add(comment.author, new Ranking { comment = 1, post = 0 });
+                        RankDic.Add(comment.author, new Ranking { comment = 1, post = 0, playTime = 0 });
                     else
                         RankDic[comment.author].comment++;
+
+                    if (TimeByUsersDic.ContainsKey(comment.author) == false)
+                        TimeByUsersDic.Add(comment.author, new List<DateTime>() { comment.time });
+                    else
+                        TimeByUsersDic[comment.author].Add(comment.time);
                 }
 
                 if (RankDic.ContainsKey(post.author) == false)
-                    RankDic.Add(post.author, new Ranking { comment = 0, post = 1 });
+                    RankDic.Add(post.author, new Ranking { comment = 0, post = 1, playTime = 0 });
                 else
                     RankDic[post.author].post++;
+
+                if (TimeByUsersDic.ContainsKey(post.author) == false)
+                    TimeByUsersDic.Add(post.author, new List<DateTime>() { post.time });
+                else
+                    TimeByUsersDic[post.author].Add(post.time);
             }
 
             var RankDicDesc = RankDic.OrderByDescending(x => x.Value.post);
 
+            foreach (var a in TimeByUsersDic)
+            {
+                var list = a.Value.OrderByDescending(x => x).ToList();
+                TimeByUsersDicDesc.Add(a.Key, list);
+            }
+
+            int timeSpan = 15;
+
+            foreach (var user in TimeByUsersDicDesc)
+            {
+                var timeList = user.Value;
+                TimeSpan activeTime = TimeSpan.Zero;
+
+                if (timeList.Count <= 1)
+                {
+                    activeTime += TimeSpan.FromMinutes(timeSpan);
+                }
+                else
+                {
+                    for (int i = 0; i < timeList.Count - 1; i++)
+                    {
+                        var diff = timeList[i] - timeList[i + 1];
+                        if (diff <= TimeSpan.FromMinutes(timeSpan))
+                        {
+                            activeTime += diff;
+                        }
+                        else
+                        {
+                            activeTime += TimeSpan.FromMinutes(timeSpan);
+                        }
+                    }
+                }
+
+
+                if (RankDic.ContainsKey(user.Key) == false)
+                {
+                    Console.WriteLine("error");
+                    continue; // 없는 경우가 있나??
+                }
+                else
+                    RankDic[user.Key].playTime = activeTime.TotalHours;
+            }
+
             StringBuilder sb = new StringBuilder();
 
             sb.Append("//갤창랭킹\r\n");
-            sb.Append("작성자, 글, 댓글\r\n");
+            sb.Append("작성자, 글, 댓글, 플레이타임(시)\r\n");
             foreach (var rank in RankDicDesc)
             {
-                sb.Append($"{rank.Key}, {rank.Value.post}, {rank.Value.comment}\r\n");
+                sb.Append($"{rank.Key}, {rank.Value.post}, {rank.Value.comment}, {Math.Round(rank.Value.playTime, 2)}\r\n");
             }
 
             SaveTextFile(sb.ToString());
@@ -132,13 +202,6 @@ namespace ArcaliveForm
         private void button2_Click(object sender, EventArgs e)
         {
             var posts = DataFile;
-
-            if (checkBox1.Checked == true)
-            {
-                DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
-                DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
-                posts = LimitPostsByTime(posts, startTime, endTime);
-            }
 
             StringBuilder sb = new StringBuilder();
             var timeDic = new Dictionary<string, int>();
@@ -199,13 +262,6 @@ namespace ArcaliveForm
         {
             var posts = DataFile;
 
-            if (checkBox1.Checked == true)
-            {
-                DateTime startTime = dateTimePicker1.Value.Date + dateTimePicker2.Value.TimeOfDay;
-                DateTime endTime = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
-                posts = LimitPostsByTime(posts, startTime, endTime);
-            }
-
             Dictionary<string, int> arcaconDic = new Dictionary<string, int>();
             foreach (var post in posts)
             {
@@ -233,6 +289,7 @@ namespace ArcaliveForm
             SaveTextFile(sb.ToString());
         }
 
+
         private void FileChooseButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog
@@ -245,14 +302,14 @@ namespace ArcaliveForm
             {
                 DataFile = ArcaliveCrawler.DeserializePosts(openFile.FileName);
                 textBox1.Text = openFile.FileName;
-                dateTimePicker1.Value = dateTimePicker2.Value =DataFile.Last().time;
+                dateTimePicker1.Value = dateTimePicker2.Value = DataFile.Last().time;
                 dateTimePicker3.Value = dateTimePicker4.Value = DataFile.First().time;
             }
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            if(checkBox2.Checked == true)
+            if (checkBox2.Checked == true)
             {
                 textBox2.Enabled = true;
             }

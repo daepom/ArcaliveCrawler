@@ -12,5 +12,6 @@ namespace Arcalive
         public string author;
         public bool isArcacon;
         public string content;
+        public DateTime time;
     }
 }

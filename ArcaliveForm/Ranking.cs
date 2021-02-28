@@ -4,5 +4,6 @@
     {
         public int post;
         public int comment;
+        public double playTime;
     }
 }

@@ -26,65 +26,6 @@ namespace Arcalive
 
         private string channelName = string.Empty;
 
-        /// <summary>
-        /// 키워드를 포함하는 채널의 주소 리스트를 반환합니다.
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <returns></returns>
-        public static List<string> GetChannelLinks(string keyword)
-        {
-            List<string> results = new List<string>();
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                string sitesource = client.DownloadString("https://arca.live/private_boards");
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(sitesource);
-                var channels = doc.DocumentNode.SelectNodes("/html/body/div/div[3]/article/div[2]/div");
-                foreach (var channel in channels)
-                {
-                    var channelName = channel.Descendants("a").First().InnerText;
-                    if (channelName.Contains(keyword))
-                    {
-                        var address = channel.Descendants("a").First().Attributes["href"].Value;
-                        results.Add("https://arca.live" + address);
-                    }
-                }
-            }
-            return results;
-        }
-
-        /// <summary>
-        /// 키워드를 포함하는 채널의 주소 하나(첫번째)를 반환합니다.
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <returns></returns>
-        public static string GetChannelLink(string keyword)
-        {
-            string result = string.Empty;
-
-            using (WebClient client = new WebClient())
-            {
-                client.Encoding = Encoding.UTF8;
-                string sitesource = client.DownloadString("https://arca.live/private_boards");
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(sitesource);
-                var channels = doc.DocumentNode.SelectNodes("/html/body/div/div[2]/article/div[2]/div");
-                foreach (var channel in channels)
-                {
-                    var channelName = channel.Descendants("a").First().InnerText;
-                    if (channelName.Contains(keyword))
-                    {
-                        var address = channel.Descendants("a").First().Attributes["href"].Value;
-                        result = "https://arca.live" + address;
-                        return result;
-                    }
-                }
-            }
-
-            return result;
-        }
 
         public ArcaliveCrawler(string channelName)
         {
@@ -150,7 +91,6 @@ namespace Arcalive
                     p.link = "https://arca.live" + postfix.Substring(0, postfix.LastIndexOf('?'));
                     if (results.Any(e => e.link == p.link))
                     {
-                        Print?.Invoke(this, new PrintCallbackArg("중복방지"));
                         continue;
                     }
 
@@ -244,11 +184,12 @@ namespace Arcalive
             {
                 var commentWrappers = commentAreaNode?.Descendants(0)
                 .Where(n => n.HasClass("comment-item"));
-                Console.WriteLine(commentWrappers.Count());
+
                 foreach (var commentWrapper in commentWrappers)
                 {
                     Comment c = new Comment();
                     var author = commentWrapper.SelectSingleNode(".//div/div[1]/span").InnerText;
+                    var time = DateTime.Parse(commentWrapper.SelectSingleNode(".//div/div[1]/div[contains(@class, 'right')]/time").Attributes["datetime"].Value);
                     if (commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]") != null)
                     {
                         var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]").Attributes["src"].Value;
@@ -269,6 +210,7 @@ namespace Arcalive
                         c.isArcacon = false;
                     }
                     c.author = author;
+                    c.time = time;
                     //c.arcacon = arcacon;
                     comments.Add(c);
                 }
@@ -298,7 +240,6 @@ namespace Arcalive
                 if (string.IsNullOrEmpty(doc.Text))
                     return -1;
 
-                
                 var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
 
                 if (posts.Count <= 1)
@@ -327,7 +268,7 @@ namespace Arcalive
                 TimeofFirstPost = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
                 TimeofLastPost = DateTime.Parse(posts[posts.Count - 1].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
 
-                if (TargetTime >= TimeofLastPost && TargetTime <= TimeofFirstPost)
+                if ((TargetTime >= TimeofLastPost && TargetTime <= TimeofFirstPost) || currentPage == 1)
                 {
                     isPageFound = true;
                 }
@@ -362,6 +303,58 @@ namespace Arcalive
                 BinaryFormatter binary = new BinaryFormatter();
                 return (List<Post>)binary.Deserialize(rs);
             }
+        }
+
+        [Obsolete]
+        public static List<string> GetChannelLinks(string keyword)
+        {
+            List<string> results = new List<string>();
+
+            using (WebClient client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                string sitesource = client.DownloadString("https://arca.live/private_boards");
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(sitesource);
+                var channels = doc.DocumentNode.SelectNodes("/html/body/div/div[3]/article/div[2]/div");
+                foreach (var channel in channels)
+                {
+                    var channelName = channel.Descendants("a").First().InnerText;
+                    if (channelName.Contains(keyword))
+                    {
+                        var address = channel.Descendants("a").First().Attributes["href"].Value;
+                        results.Add("https://arca.live" + address);
+                    }
+                }
+            }
+            return results;
+        }
+
+        [Obsolete]
+        public static string GetChannelLink(string keyword)
+        {
+            string result = string.Empty;
+
+            using (WebClient client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                string sitesource = client.DownloadString("https://arca.live/private_boards");
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(sitesource);
+                var channels = doc.DocumentNode.SelectNodes("/html/body/div/div[2]/article/div[2]/div");
+                foreach (var channel in channels)
+                {
+                    var channelName = channel.Descendants("a").First().InnerText;
+                    if (channelName.Contains(keyword))
+                    {
+                        var address = channel.Descendants("a").First().Attributes["href"].Value;
+                        result = "https://arca.live" + address;
+                        return result;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
