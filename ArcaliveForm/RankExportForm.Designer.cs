@@ -48,6 +48,7 @@
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBox1
@@ -241,11 +242,24 @@
             this.label6.TabIndex = 19;
             this.label6.Text = "(띄어쓰기x, \',\'로 구분)";
             // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Checked = true;
+            this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox3.Location = new System.Drawing.Point(12, 218);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(248, 16);
+            this.checkBox3.TabIndex = 20;
+            this.checkBox3.Text = "아카콘 집계 시 중복되는 아카콘들을 통합";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
             // RankExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(328, 330);
+            this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.checkBox2);
@@ -296,5 +310,6 @@
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox checkBox3;
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -176,7 +177,6 @@ namespace ArcaliveForm
                     }
                 }
 
-
                 if (RankDic.ContainsKey(user.Key) == false)
                 {
                     Console.WriteLine("error");
@@ -274,6 +274,42 @@ namespace ArcaliveForm
                         arcaconDic[comment.content]++;
                 }
             }
+
+            if (checkBox3.Checked == true)
+            {
+                var tmpList = arcaconDic.ToList();
+                HashSet<string> toRemove = new HashSet<string>();
+                List<byte[]> hashs = new List<byte[]>();
+
+                foreach (var pair in tmpList)
+                {
+                    using (Bitmap bitmap = ImageComparer.DownloadImageFromUrl("https:" + pair.Key))
+                    {
+                        ImageConverter converter = new ImageConverter();
+                        hashs.Add((byte[])converter.ConvertTo(bitmap, typeof(byte[])));
+                    }
+                }
+
+                for (int i = 0; i < tmpList.Count - 1; i++)
+                {
+                    if (toRemove.Contains(tmpList[i].Key))
+                        continue;
+                    for (int j = i + 1; j < tmpList.Count; j++)
+                    {
+                        if (ImageComparer.Compare(hashs[i], hashs[j]) == true)
+                        {
+                            Console.WriteLine($"{tmpList[i].Key} == {tmpList[j].Key}");
+                            arcaconDic[tmpList[i].Key] += arcaconDic[tmpList[j].Key];
+                            toRemove.Add(tmpList[j].Key);
+                        }
+                    }
+                }
+                foreach (var str in toRemove)
+                {
+                    arcaconDic.Remove(str);
+                }
+            }
+
             var arcaconDicDesc = arcaconDic.OrderByDescending(x => x.Value);
 
             StringBuilder sb = new StringBuilder();
@@ -288,7 +324,6 @@ namespace ArcaliveForm
 
             SaveTextFile(sb.ToString());
         }
-
 
         private void FileChooseButton_Click(object sender, EventArgs e)
         {

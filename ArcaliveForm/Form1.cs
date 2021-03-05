@@ -253,6 +253,7 @@ namespace ArcaliveForm
             System.Diagnostics.Process.Start("https://github.com/tjgus1668/ArcaliveCrawler/releases");
         }
 
+        // 데이터파일 통합
         private void button5_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog
@@ -269,6 +270,8 @@ namespace ArcaliveForm
                 {
                     CombinedPosts.AddRange(ArcaliveCrawler.DeserializePosts(file));
                 }
+
+                CombinedPosts = CombinedPosts.OrderByDescending(x => x.time).ToList();
 
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
