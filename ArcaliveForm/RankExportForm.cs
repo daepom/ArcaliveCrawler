@@ -150,7 +150,7 @@ namespace ArcaliveForm
                 TimeByUsersDicDesc.Add(a.Key, list);
             }
 
-            int timeSpan = 15;
+            const int timeSpan = 10;
 
             foreach (var user in TimeByUsersDicDesc)
             {

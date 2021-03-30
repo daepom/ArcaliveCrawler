@@ -63,8 +63,8 @@ namespace Arcalive
 
                 var posts = doc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
 
-                int i;
-                for (i = 0; i < posts.Count; i++)
+                int i = 0;
+                for (; i < posts.Count; i++)
                 {
                     if (posts[i].Attributes["class"].Value == "vrow")
                         // 공지사항이 아닌 글이 나올 때까지 스킵

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.channelNameTextBox = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -50,6 +51,7 @@
             this.divider1 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.OptionsFormShowButton = new System.Windows.Forms.Button();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.SuspendLayout();
             // 
             // channelNameTextBox
@@ -250,6 +252,11 @@
             this.OptionsFormShowButton.UseVisualStyleBackColor = true;
             this.OptionsFormShowButton.Click += new System.EventHandler(this.OptionsFormShowButton_Click);
             // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Visible = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -309,6 +316,7 @@
         private System.Windows.Forms.Label divider1;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button OptionsFormShowButton;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
     }
 }
 

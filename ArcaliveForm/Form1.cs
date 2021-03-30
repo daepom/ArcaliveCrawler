@@ -1,7 +1,6 @@
 ﻿using Arcalive;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -32,12 +31,12 @@ namespace ArcaliveForm
                 SkippingTags = new List<string> { "신문고" }
             };
 
-            string html = string.Empty;
+            string html;
             using (WebClient wc = new WebClient())
             {
                 html = wc.DownloadString("https://github.com/tjgus1668/arcalivecrawler/releases");
             }
-            HtmlAgilityPack.HtmlDocument hd = new HtmlAgilityPack.HtmlDocument();
+            var hd = new HtmlAgilityPack.HtmlDocument();
             hd.LoadHtml(html);
             var releases = hd.DocumentNode.SelectNodes("//div[contains(@class, 'release-entry')]");
             var latestRelease = releases[0].SelectSingleNode("//div[contains(@class, 'd-flex flex-items-start')]/div[1]/a").InnerText;
@@ -50,7 +49,7 @@ namespace ArcaliveForm
         {
             Invoke((Action)(() =>
             {
-                textBox2.AppendText((arg as PrintCallbackArg).Str + "\r\n");
+                textBox2.AppendText((arg as PrintCallbackArg)?.Str + "\r\n");
             }));
         }
 
@@ -121,6 +120,8 @@ namespace ArcaliveForm
             });
             await Task.WhenAll(task);
 
+            notifyIcon1.ShowBalloonTip(1000, "아카라이브 크롤러", "크롤링 완료", ToolTipIcon.Info);
+
             string filename = string.Empty;
             SaveFileDialog saveFile = new SaveFileDialog
             {
@@ -157,95 +158,17 @@ namespace ArcaliveForm
             {
                 var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
 
-                StringBuilder sb = new StringBuilder();
-
-                posts.ForEach(x => { sb.Append($"{x.title}\r\n"); });
-
                 SaveFileDialog saveFile = new SaveFileDialog
                 {
                     DefaultExt = "txt",
-                    Title = "텍스트 파일을 어디에 저장할까요?",
-                    Filter = "텍스트 파일 (*.txt)|*.txt"
+                    Title = "JSON 파일을 어디에 저장할까요?",
+                    Filter = "텍스트 파일 (*.json)|*.json"
                 };
                 if (saveFile.ShowDialog() == DialogResult.OK)
                 {
-                    File.WriteAllText(saveFile.FileName, sb.ToString());
+                    File.WriteAllText(saveFile.FileName, "");
                 }
             }
-            else return;
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFile = new OpenFileDialog
-            {
-                DefaultExt = "dat",
-                Title = "크롤링 데이터 파일을 선택해주세요.",
-                Filter = "크롤링 데이터 파일 (*.dat)|*.dat"
-            };
-            if (openFile.ShowDialog() == DialogResult.OK)
-            {
-                var posts = ArcaliveCrawler.DeserializePosts(openFile.FileName);
-
-                StringBuilder sb = new StringBuilder();
-                var timeDic = new Dictionary<string, int>();
-                var weekDic = new Dictionary<string, int>();
-                var dateDic = new Dictionary<string, int>();
-
-                foreach (var post in posts)
-                {
-                    var hour = post.time.ToString("HH");
-                    if (timeDic.ContainsKey(hour) == false)
-                    {
-                        timeDic.Add(hour, 1);
-                    }
-                    else timeDic[hour]++;
-
-                    var week = post.time.DayOfWeek;
-                    if (weekDic.ContainsKey(week.ToString()) == false)
-                    {
-                        weekDic.Add(week.ToString(), 1);
-                    }
-                    else weekDic[week.ToString()]++;
-
-                    var date = post.time.Date.Day;
-                    if (dateDic.ContainsKey(date.ToString()) == false)
-                    {
-                        dateDic.Add(date.ToString(), 1);
-                    }
-                    else dateDic[date.ToString()]++;
-                }
-
-                var timeDicDesc = timeDic.OrderBy(x => x.Key);
-                var dateDicDesc = dateDic.OrderBy(x => x.Key);
-
-                foreach (var time in timeDicDesc)
-                {
-                    sb.AppendLine($"{time.Key}, {time.Value}");
-                }
-                sb.AppendLine();
-                foreach (var week in weekDic)
-                {
-                    sb.AppendLine($"{week.Key}, {week.Value}");
-                }
-                sb.AppendLine();
-                foreach (var date in dateDicDesc)
-                {
-                    sb.AppendLine($"{date.Key}, {date.Value}");
-                }
-
-                SaveFileDialog saveFile = new SaveFileDialog
-                {
-                    DefaultExt = "txt",
-                    Title = "텍스트 파일을 어디에 저장할까요?",
-                    Filter = "텍스트 파일 (*.txt)|*.txt"
-                };
-                if (saveFile.ShowDialog() == DialogResult.OK)
-                {
-                    File.WriteAllText(saveFile.FileName, sb.ToString());
-                }
-            }
-            else return;
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
