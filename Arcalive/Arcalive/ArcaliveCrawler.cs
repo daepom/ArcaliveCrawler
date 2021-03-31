@@ -8,9 +8,6 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
-
-//TODO 아카콘 댓글 비율
 
 namespace Arcalive
 {
@@ -20,12 +17,11 @@ namespace Arcalive
 
         public event EventHandler DumpText;
 
-        public event EventHandler GetCrawlingProgress;
+        public event EventHandler ShowCrawlingProgress;
 
         public static int CallTimes { get; private set; }
 
-        private string channelName = string.Empty;
-
+        private readonly string channelName = string.Empty;
 
         public ArcaliveCrawler(string channelName)
         {
@@ -44,8 +40,8 @@ namespace Arcalive
 
         public List<Post> CrawlBoards(DateTime? From = null, DateTime? To = null, int startPage = 1)
         {
-            if (From == null) From = DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
-            if (To == null) To = DateTime.Today;
+            From ??= DateTime.Today.AddDays(1 - DateTime.Today.Day).AddMonths(-1);
+            To ??= DateTime.Today;
 
             int page = startPage;
             List<Post> results = new List<Post>();
@@ -74,14 +70,23 @@ namespace Arcalive
                 {
                     Post p = new Post();
 
-                    p.time = DateTime.Parse(posts[i].SelectSingleNode(".//div[2]/span[2]/time").Attributes["datetime"].Value);
+                    var tmpNode = posts[i].SelectSingleNode(".//div[2]/span[2]/time");
+                    if (tmpNode == null)
+                    {
+                        // 2021-03-31 부로 생긴 "(권한 없음)" 기능에 대비한 예외 처리
+                        Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlBoard >> Skip Post >> Access Denied"));
+                        continue;
+                    }
+
+                    p.time = DateTime.Parse(tmpNode.Attributes["datetime"].Value);
 
                     if (p.time >= To)
                     {
                         Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlBoard >> Skip Post"));
                         continue;
                     }
-                    else if (p.time <= From)
+
+                    if (p.time <= From)
                     {
                         isEalierThanFrom = false;
                         break;
@@ -133,7 +138,7 @@ namespace Arcalive
                 newPost = Posts[i];
 
                 var articleInfoNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'article-info')]");
-                
+
                 var contentNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'fr-view article-content')]");
 
                 var commentNumNode = articleInfoNode.SelectSingleNode(".//span[8]");
@@ -148,7 +153,7 @@ namespace Arcalive
                 if (int.Parse(commentNumNode.InnerText) == 0) continue; // 댓글이 없으면 스킵
 
                 // 댓글이 50개를 넘어가 페이지가 분리될 경우
-                if(doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'pagination-wrapper my-2')]") != null)
+                if (doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'pagination-wrapper my-2')]") != null)
                 {
                     int maxCommentPageNumber = int.Parse(doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'pagination-wrapper my-2')]/ul/li[contains(@class, 'page-item active')]/a").InnerText);
                     List<Comment> comments = new List<Comment>();
@@ -170,7 +175,7 @@ namespace Arcalive
 
                 results.Add(newPost);
                 sp.Stop();
-                GetCrawlingProgress?.Invoke(this, new ProgressPagesCallBack(i + 1, Posts.Count, (int)sp.Elapsed.TotalMilliseconds));
+                ShowCrawlingProgress?.Invoke(this, new ProgressPagesCallBack(i + 1, Posts.Count, (int)sp.Elapsed.TotalMilliseconds));
             }
 
             return results;
@@ -257,8 +262,7 @@ namespace Arcalive
                         break;
                 }
 
-
-                if(i == posts.Count)
+                if (i == posts.Count)
                 {
                     // 글이 없을 조건 2
                     MaxPage = currentPage;
@@ -303,6 +307,18 @@ namespace Arcalive
                 BinaryFormatter binary = new BinaryFormatter();
                 return (List<Post>)binary.Deserialize(rs);
             }
+        }
+
+        public bool TryCrawl(out string channelTitle)
+        {
+            HtmlDocument doc = DownloadDoc(channelName);
+            channelTitle = string.Empty;
+
+
+            var postNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'board-title')]");
+            if (postNode == null) return false;
+            channelTitle = postNode.InnerText;
+            return true;
         }
 
         [Obsolete]

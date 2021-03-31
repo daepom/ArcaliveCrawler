@@ -52,6 +52,8 @@
             this.label10 = new System.Windows.Forms.Label();
             this.OptionsFormShowButton = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.TestButton = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // channelNameTextBox
@@ -257,11 +259,31 @@
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
             // 
+            // TestButton
+            // 
+            this.TestButton.Location = new System.Drawing.Point(120, 24);
+            this.TestButton.Name = "TestButton";
+            this.TestButton.Size = new System.Drawing.Size(50, 23);
+            this.TestButton.TabIndex = 32;
+            this.TestButton.Text = "테스트";
+            this.TestButton.UseVisualStyleBackColor = true;
+            this.TestButton.Click += new System.EventHandler(this.TestButton_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(177, 34);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(0, 12);
+            this.label6.TabIndex = 33;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(500, 572);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.TestButton);
             this.Controls.Add(this.OptionsFormShowButton);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.divider1);
@@ -317,6 +339,8 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Button OptionsFormShowButton;
         private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.Button TestButton;
+        private System.Windows.Forms.Label label6;
     }
 }
 

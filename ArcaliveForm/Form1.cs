@@ -101,7 +101,7 @@ namespace ArcaliveForm
             DateTime endDate = dateTimePicker3.Value.Date + dateTimePicker4.Value.TimeOfDay;
 
             ac.Print += WriteLog;
-            ac.GetCrawlingProgress += UpdateCrawlProgress;
+            ac.ShowCrawlingProgress += UpdateCrawlProgress;
 
             var skip = Options.SkippingTags;
 
@@ -223,6 +223,26 @@ namespace ArcaliveForm
             options.OptionsCallBack += UpdateOptions;
             options.Owner = this;
             options.ShowDialog();
+        }
+
+        private void TestButton_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(channelNameTextBox.Text))
+            {
+                MessageBox.Show("채널 url을 입력해주세요.");
+                return;
+            }
+
+            ArcaliveCrawler ac = new ArcaliveCrawler(channelNameTextBox.Text);
+
+            if (ac.TryCrawl(out string title))
+            {
+                label6.Text = title.Replace("\n", " ");
+            }
+            else
+            {
+                label6.Text = "채널 url을 다시 한 번 확인해주세요.";
+            }
         }
     }
 }
