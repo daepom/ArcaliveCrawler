@@ -8,6 +8,9 @@ namespace Arcalive
 {
     public partial class ArcaliveCrawler
     {
+        /// <summary>
+        /// 아카라이브 공식 앱 헤더
+        /// </summary>
         public const string ArcaliveUserAgent = "live.arca.android/0.8.214";
 
         public HtmlDocument DownloadDoc(
@@ -42,7 +45,7 @@ namespace Arcalive
             return doc;
         }
 
-        private HtmlDocument DownloadDoc(string link, WebHeaderCollection headers, int term)
+        public HtmlDocument DownloadDoc(string link, WebHeaderCollection headers, int term)
         {
             HtmlDocument doc = new HtmlDocument();
             using (WebClient client = new WebClient() { Encoding = Encoding.UTF8 })
