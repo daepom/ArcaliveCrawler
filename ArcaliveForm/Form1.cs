@@ -162,12 +162,6 @@ namespace ArcaliveForm
                 foreach (var post in posts)
                 {
                     sb.AppendLine(post.title);
-                    sb.AppendLine(post.content);
-                    foreach (var comment in post.comments)
-                    {
-                        if(comment.isArcacon == false)
-                            sb.AppendLine(comment.content);
-                    }
                 }
 
                 SaveFileDialog saveFile = new SaveFileDialog
