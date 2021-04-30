@@ -125,7 +125,11 @@ namespace Arcalive
                 Stopwatch sp = new Stopwatch();
                 sp.Start();
 
-                if (skip.Any(x => (x == Posts[i].badge) && x != string.Empty)) continue;
+                if (skip.Any(x => (x == Posts[i].badge) && x != string.Empty))
+                {
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> CrawlPosts >> Skip Post by Tag"));
+                    continue;
+                }
                 HtmlDocument doc = DownloadDoc(Posts[i].link);
                 if (string.IsNullOrEmpty(doc.Text))
                 {

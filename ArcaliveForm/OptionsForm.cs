@@ -29,6 +29,7 @@ namespace ArcaliveForm
             if (options.StartPageFinding == 1) PFASetPageButton.Checked = true;
             else PFABinaryRadioButton.Checked = true;
             textBox1.Text = options.StartPage.ToString();
+            textBox2.Text = string.Join(",", options.SkippingTags.ToArray());
         }
 
         private void SaveOptionsButton_Click(object sender, EventArgs e)
