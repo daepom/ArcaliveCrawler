@@ -26,10 +26,11 @@ namespace Arcalive
                 {
                     siteSource = client.DownloadString(link);
                 }
-                catch (WebException e)
+                catch //(WebException e)
                 {
-                    int statusCode = (int)(e.Response as HttpWebResponse).StatusCode;
-                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML {statusCode} Error"));
+                    //int statusCode = (int)(e.Response as HttpWebResponse).StatusCode;
+                    //Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML {statusCode} Error"));
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML Error"));
                 }
                 finally
                 {
