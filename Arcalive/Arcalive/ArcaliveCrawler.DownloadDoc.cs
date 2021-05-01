@@ -11,7 +11,7 @@ namespace Arcalive
         /// <summary>
         /// 아카라이브 공식 앱 헤더
         /// </summary>
-        public const string ArcaliveUserAgent = "live.arca.android/0.8.214";
+        public const string ArcaliveUserAgent = "";//"live.arca.android/0.8.214";
 
         public HtmlDocument DownloadDoc(
             string link, string userAgent = ArcaliveUserAgent, int term = 0)
@@ -26,11 +26,18 @@ namespace Arcalive
                 {
                     siteSource = client.DownloadString(link);
                 }
-                catch //(WebException e)
+                catch (WebException e)
                 {
-                    //int statusCode = (int)(e.Response as HttpWebResponse).StatusCode;
-                    //Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML {statusCode} Error"));
-                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML Error"));
+                    var statusCode = ((HttpWebResponse)e.Response)?.StatusCode.ToString() ??
+                                     "Report this to developer!!\n" +
+                                     $"=> {string.Join(",", client.Headers.AllKeys)}";
+
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML {statusCode} Error"));
+                    //Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> HTML Error"));
+                }
+                catch (Exception e)
+                {
+                    Print?.Invoke(this, new PrintCallbackArg($"{CallTimes++,5} >> DownloadDoc >> Error: {e.Message}"));
                 }
                 finally
                 {
