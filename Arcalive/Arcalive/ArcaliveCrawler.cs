@@ -204,6 +204,8 @@ namespace Arcalive
                         var arcacon = commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@src]").Attributes["src"].Value;
                         c.content = arcacon;
                         c.isArcacon = true;
+                        c.dataId = int.Parse(commentWrapper.SelectSingleNode(".//div/div[2]/div/img[@data-id]")
+                            .Attributes["data-id"].Value);
                     }
                     else if (commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@src]") != null)
                     {
@@ -212,6 +214,8 @@ namespace Arcalive
                             arcacon += ".gif";
                         c.content = arcacon;
                         c.isArcacon = true;
+                        c.dataId = int.Parse(commentWrapper.SelectSingleNode(".//div/div[2]/div/video[@data-id]")
+                            .Attributes["data-id"].Value);
                     }
                     else
                     {

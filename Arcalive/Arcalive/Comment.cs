@@ -13,5 +13,6 @@ namespace Arcalive
         public bool isArcacon;
         public string content;
         public DateTime time;
+        public int dataId;
     }
 }

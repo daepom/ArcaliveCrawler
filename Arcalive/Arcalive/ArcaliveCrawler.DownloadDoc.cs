@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -11,7 +12,7 @@ namespace Arcalive
         /// <summary>
         /// 아카라이브 공식 앱 헤더
         /// </summary>
-        public const string ArcaliveUserAgent = "";//"live.arca.android/0.8.214";
+        public const string ArcaliveUserAgent = "live.arca.android/0.8.214";
 
         public HtmlDocument DownloadDoc(
             string link, string userAgent = ArcaliveUserAgent, int term = 0)

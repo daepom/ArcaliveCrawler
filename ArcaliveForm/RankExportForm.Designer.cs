@@ -49,6 +49,7 @@
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.button4 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // checkBox1
@@ -158,7 +159,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(220, 242);
+            this.button1.Location = new System.Drawing.Point(125, 240);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(93, 35);
             this.button1.TabIndex = 11;
@@ -168,7 +169,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(125, 283);
+            this.button2.Location = new System.Drawing.Point(223, 240);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(93, 35);
             this.button2.TabIndex = 12;
@@ -178,11 +179,11 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(223, 283);
+            this.button3.Location = new System.Drawing.Point(126, 283);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(92, 35);
             this.button3.TabIndex = 13;
-            this.button3.Text = "아카콘 랭킹 출력";
+            this.button3.Text = "아카콘 전체 랭킹 출력";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -254,11 +255,22 @@
             this.checkBox3.Text = "아카콘 집계 시 중복되는 아카콘들을 통합";
             this.checkBox3.UseVisualStyleBackColor = true;
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(223, 283);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(92, 35);
+            this.button4.TabIndex = 21;
+            this.button4.Text = "아카콘 종류별 랭킹 출력";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
             // RankExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(328, 330);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.textBox2);
@@ -311,5 +323,6 @@
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.Button button4;
     }
 }

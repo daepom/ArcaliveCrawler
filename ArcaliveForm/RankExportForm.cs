@@ -325,6 +325,73 @@ namespace ArcaliveForm
             SaveTextFile(sb.ToString());
         }
 
+        // 아카콘 종류별 랭킹
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var posts = DataFile;
+            // ID, 집계수
+            var dataIds = new Dictionary<int, int>();
+            foreach (var dataId in from post in posts from c in post.comments where c.isArcacon select c.dataId)
+            {
+                if (dataIds.ContainsKey(dataId) == false)
+                {
+                    dataIds.Add(dataId, 1);
+                }
+                else
+                {
+                    dataIds[dataId]++;
+                }
+            }
+
+            // ID, 실제 링크
+            var memoDic = new Dictionary<int, int>();
+            // 실제 링크, 집계수
+            var rankDic = new Dictionary<int, int>();
+
+            foreach (var dataId in dataIds)
+            {
+                var id = dataId.Key;
+                if (memoDic.ContainsKey(id) == false)
+                {
+                    var a = new ArcaliveCrawler("asd").DownloadDoc("https://arca.live/api/emoticon/shop/" + id);
+                    if (string.IsNullOrEmpty(a.Text))
+                        memoDic.Add(id, -1);
+                    else
+                    {
+                        var number = int.Parse(a.DocumentNode.SelectSingleNode("/html/body/div/div[3]/article/div/div[2]/div[2]/form")
+                            .Attributes["action"].Value.Split('/')[2]);
+                        memoDic.Add(id, number);
+                    }
+                }
+            }
+            foreach (var i in memoDic.Where(i => i.Value != -1))
+            {
+                if (rankDic.ContainsKey(i.Value) == false)
+                {
+                    rankDic.Add(i.Value, dataIds[i.Key]);
+                }
+                else
+                {
+                    rankDic[i.Value] += dataIds[i.Key];
+                }
+            }
+
+            var rankDicDesc = rankDic.OrderByDescending(x => x.Value);
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("//아카콘 종류별 랭킹");
+            sb.AppendLine($"아카콘 종류: {rankDicDesc.Count()}");
+            sb.AppendLine("삭제된 아카콘은 집계되지 않습니다.");
+            sb.AppendLine("아카콘 링크, 총 사용 횟수");
+            foreach (var dic in rankDicDesc)
+            {
+                sb.AppendLine($"{"https://arca.live/e/" + dic.Key}, {dic.Value}");
+            }
+
+            SaveTextFile(sb.ToString());
+        }
+
         private void FileChooseButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog
