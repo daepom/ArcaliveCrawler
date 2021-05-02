@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -348,15 +349,19 @@ namespace ArcaliveForm
             // 실제 링크, 집계수
             var rankDic = new Dictionary<int, int>();
 
+            Stopwatch sp = new Stopwatch();
+            sp.Start();
             foreach (var dataId in dataIds)
             {
                 var id = dataId.Key;
                 if (memoDic.ContainsKey(id) == false)
                 {
+
                     var a = new ArcaliveCrawler("asd").GetRedirectedUrl("https://arca.live/api/emoticon/shop/" + id,
-                        term: 50);
+                        term: 100);
                     var number = int.Parse(a.Split('/').Last());
                     memoDic.Add(id, number);
+
                     //if (string.IsNullOrEmpty(a.Text))
                     //    memoDic.Add(id, -1);
                     //else
@@ -367,6 +372,10 @@ namespace ArcaliveForm
                     //}
                 }
             }
+
+            sp.Stop();
+            long aaa = sp.ElapsedMilliseconds;
+
             foreach (var i in memoDic.Where(i => i.Value != -1))
             {
                 if (rankDic.ContainsKey(i.Value) == false)

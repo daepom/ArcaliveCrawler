@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -86,6 +87,9 @@ namespace Arcalive
 
         public string GetRedirectedUrl(string baseLink, string userAgent = ArcaliveUserAgent, int term = 0 )
         {
+            Stopwatch sp = new Stopwatch();
+            sp.Start();
+
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create(baseLink);
             request.UserAgent = userAgent;
             request.AllowAutoRedirect = false;
@@ -93,7 +97,10 @@ namespace Arcalive
             string result = response.Headers["location"];
             response.Close();
 
-            Thread.Sleep(term);
+            sp.Start();
+
+            int tick = (int)sp.ElapsedMilliseconds;
+            Thread.Sleep(term - tick > 0 ? term - tick : 0);
 
             return result;
         }

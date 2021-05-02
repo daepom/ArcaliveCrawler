@@ -21,7 +21,7 @@ namespace Arcalive
 
         public static int CallTimes { get; private set; }
 
-        private readonly string channelName = string.Empty;
+        private readonly string channelName;
 
         public ArcaliveCrawler(string channelName)
         {
