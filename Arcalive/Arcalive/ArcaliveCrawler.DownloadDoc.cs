@@ -83,5 +83,19 @@ namespace Arcalive
 
             return doc;
         }
+
+        public string GetRedirectedUrl(string baseLink, string userAgent = ArcaliveUserAgent, int term = 0 )
+        {
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(baseLink);
+            request.UserAgent = userAgent;
+            request.AllowAutoRedirect = false;
+            HttpWebResponse response = (HttpWebResponse) request.GetResponse();
+            string result = response.Headers["location"];
+            response.Close();
+
+            Thread.Sleep(term);
+
+            return result;
+        }
     }
 }

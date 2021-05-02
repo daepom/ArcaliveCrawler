@@ -353,15 +353,18 @@ namespace ArcaliveForm
                 var id = dataId.Key;
                 if (memoDic.ContainsKey(id) == false)
                 {
-                    var a = new ArcaliveCrawler("asd").DownloadDoc("https://arca.live/api/emoticon/shop/" + id);
-                    if (string.IsNullOrEmpty(a.Text))
-                        memoDic.Add(id, -1);
-                    else
-                    {
-                        var number = int.Parse(a.DocumentNode.SelectSingleNode("/html/body/div/div[3]/article/div/div[2]/div[2]/form")
-                            .Attributes["action"].Value.Split('/')[2]);
-                        memoDic.Add(id, number);
-                    }
+                    var a = new ArcaliveCrawler("asd").GetRedirectedUrl("https://arca.live/api/emoticon/shop/" + id,
+                        term: 50);
+                    var number = int.Parse(a.Split('/').Last());
+                    memoDic.Add(id, number);
+                    //if (string.IsNullOrEmpty(a.Text))
+                    //    memoDic.Add(id, -1);
+                    //else
+                    //{
+                    //    var number = int.Parse(a.DocumentNode.SelectSingleNode("/html/body/div/div[3]/article/div/div[2]/div[2]/form")
+                    //        .Attributes["action"].Value.Split('/')[2]);
+                    //    memoDic.Add(id, number);
+                    //}
                 }
             }
             foreach (var i in memoDic.Where(i => i.Value != -1))
@@ -382,7 +385,7 @@ namespace ArcaliveForm
 
             sb.AppendLine("//아카콘 종류별 랭킹");
             sb.AppendLine($"아카콘 종류: {rankDicDesc.Count()}");
-            sb.AppendLine("삭제된 아카콘은 집계되지 않습니다.");
+            //sb.AppendLine("삭제된 아카콘은 집계되지 않습니다.");
             sb.AppendLine("아카콘 링크, 총 사용 횟수");
             foreach (var dic in rankDicDesc)
             {
