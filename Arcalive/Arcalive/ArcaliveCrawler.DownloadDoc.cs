@@ -15,6 +15,8 @@ namespace Arcalive
         /// </summary>
         public const string ArcaliveUserAgent = "live.arca.android/0.8.214";
 
+        public static int CALL = 0;
+
         public HtmlDocument DownloadDoc(
             string link, string userAgent = ArcaliveUserAgent, int term = 0)
         {
@@ -85,19 +87,41 @@ namespace Arcalive
             return doc;
         }
 
-        public string GetRedirectedUrl(string baseLink, string userAgent = ArcaliveUserAgent, int term = 0 )
+        public string GetRedirectedUrl(string baseLink, out HtmlDocument doc, string userAgent = ArcaliveUserAgent, int term = 0)
         {
+            CALL++;
             Stopwatch sp = new Stopwatch();
             sp.Start();
 
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(baseLink);
+            var request = (HttpWebRequest) WebRequest.Create(baseLink);
             request.UserAgent = userAgent;
             request.AllowAutoRedirect = false;
-            HttpWebResponse response = (HttpWebResponse) request.GetResponse();
-            string result = response.Headers["location"];
-            response.Close();
+            var response1 = (HttpWebResponse) request.GetResponse();
+            string result = response1.Headers["location"];
+            response1.Close();
 
-            sp.Start();
+            request = (HttpWebRequest) WebRequest.Create("https://arca.live" + result);
+            request.UserAgent = userAgent;
+            string html = string.Empty;
+            doc = new HtmlDocument();
+            try
+            {
+                var response2 = (HttpWebResponse) request.GetResponse();
+                using (StreamReader sr = new StreamReader(response2.GetResponseStream()))
+                {
+                    html = sr.ReadToEnd();
+                }
+            }
+            catch
+            {
+                // Do Nothing
+            }
+            finally
+            {
+                doc.LoadHtml(html);
+            }
+
+            sp.Stop();
 
             int tick = (int)sp.ElapsedMilliseconds;
             Thread.Sleep(term - tick > 0 ? term - tick : 0);

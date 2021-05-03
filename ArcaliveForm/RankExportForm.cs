@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -330,61 +329,88 @@ namespace ArcaliveForm
         private void button4_Click(object sender, EventArgs e)
         {
             var posts = DataFile;
-            // ID, 집계수
-            var dataIds = new Dictionary<int, int>();
-            foreach (var dataId in from post in posts from c in post.comments where c.isArcacon select c.dataId)
+            // ID, 집계 수
+            var arcacons = new Dictionary<Arcacon, int>();
+            foreach (var a in from post in posts from comment in post.comments where comment.isArcacon select new Arcacon(comment.dataId, comment.content))
             {
-                if (dataIds.ContainsKey(dataId) == false)
+                if (arcacons.ContainsKey(a) == false)
                 {
-                    dataIds.Add(dataId, 1);
+                    arcacons.Add(a, 1);
                 }
                 else
                 {
-                    dataIds[dataId]++;
+                    arcacons[a]++;
                 }
             }
 
             // ID, 실제 링크
-            var memoDic = new Dictionary<int, int>();
-            // 실제 링크, 집계수
-            var rankDic = new Dictionary<int, int>();
-
-            Stopwatch sp = new Stopwatch();
-            sp.Start();
-            foreach (var dataId in dataIds)
+            var memoDic = new Dictionary<Arcacon, int>();
+            // 어디 아카콘 종류인지 저장하는 메모 리스트
+            var arcaconPacks = new List<ArcaconPack>();
+            foreach (var currentArcacon in arcacons.Select(arcacon => arcacon.Key))
             {
-                var id = dataId.Key;
-                if (memoDic.ContainsKey(id) == false)
+                if (memoDic.ContainsKey(currentArcacon) == false)
                 {
+                    // 메모이제이션
+                    foreach (var arcaconPack in from arcaconPack in arcaconPacks from packArcacon in arcaconPack.arcacons where currentArcacon.address == packArcacon.address select arcaconPack)
+                    {
+                        memoDic.Add(currentArcacon, arcaconPack.id);
+                        goto OUT;
+                    }
 
-                    var a = new ArcaliveCrawler("asd").GetRedirectedUrl("https://arca.live/api/emoticon/shop/" + id,
-                        term: 100);
-                    var number = int.Parse(a.Split('/').Last());
-                    memoDic.Add(id, number);
+                    // 처음보는 아카콘일 경우
 
-                    //if (string.IsNullOrEmpty(a.Text))
-                    //    memoDic.Add(id, -1);
-                    //else
-                    //{
-                    //    var number = int.Parse(a.DocumentNode.SelectSingleNode("/html/body/div/div[3]/article/div/div[2]/div[2]/form")
-                    //        .Attributes["action"].Value.Split('/')[2]);
-                    //    memoDic.Add(id, number);
-                    //}
+                    // 아카콘 추가
+                    var redirectedUrl = new ArcaliveCrawler("asd").GetRedirectedUrl("https://arca.live/api/emoticon/shop/" + currentArcacon.dataid,
+                        term: 100, doc: out var doc);
+                    var number = int.Parse(redirectedUrl.Split('/').Last());
+                    memoDic.Add(currentArcacon, number);
+
+                    // 삭제된 아카콘일 경우
+                    if (string.IsNullOrEmpty(doc.Text))
+                        continue;
+                    
+                    // 메모
+                    var arcaconNodesImg = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/img");
+                    var arcaconNodesVid = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/video");
+                    var newArcaconPack = new ArcaconPack(number);
+                    if (arcaconNodesImg != null)
+                    {
+                        foreach (var arcaconNode in arcaconNodesImg)
+                        {
+                            var src = arcaconNode.Attributes["src"].Value;
+                            var newArcacon = new Arcacon(src);
+                            newArcaconPack.arcacons.Add(newArcacon);
+                        }
+                    }
+                    if (arcaconNodesVid != null)
+                    {
+                        foreach (var arcaconNode in arcaconNodesVid)
+                        {
+                            var src = arcaconNode.Attributes["src"].Value.EndsWith("mp4")
+                                ? arcaconNode.Attributes["src"].Value + ".gif"
+                                : arcaconNode.Attributes["src"].Value;
+                            var newArcacon = new Arcacon(src);
+                            newArcaconPack.arcacons.Add(newArcacon);
+                        }
+                    }
+                    arcaconPacks.Add(newArcaconPack);
                 }
+
+                OUT: ;
             }
 
-            sp.Stop();
-            long aaa = sp.ElapsedMilliseconds;
-
+            // 실제 링크, 집계수
+            var rankDic = new Dictionary<int, int>();
             foreach (var i in memoDic.Where(i => i.Value != -1))
             {
                 if (rankDic.ContainsKey(i.Value) == false)
                 {
-                    rankDic.Add(i.Value, dataIds[i.Key]);
+                    rankDic.Add(i.Value, arcacons[i.Key]);
                 }
                 else
                 {
-                    rankDic[i.Value] += dataIds[i.Key];
+                    rankDic[i.Value] += arcacons[i.Key];
                 }
             }
 
@@ -402,6 +428,7 @@ namespace ArcaliveForm
             }
 
             SaveTextFile(sb.ToString());
+            Console.WriteLine($"{arcacons.Count}, {memoDic.Count}, {arcaconPacks.Count}, {rankDic.Count}, {ArcaliveCrawler.CALL}");
         }
 
         private void FileChooseButton_Click(object sender, EventArgs e)
