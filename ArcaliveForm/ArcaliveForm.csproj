@@ -39,6 +39,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,6 +51,7 @@
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>F7786DE233E70834D68475271ABD4485E29FCA44</ManifestCertificateThumbprint>
@@ -93,6 +95,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddDataForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDataForm.Designer.cs">
+      <DependentUpon>AddDataForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ArcaconPack.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -120,7 +128,13 @@
     <Compile Include="RankExportForm.Designer.cs">
       <DependentUpon>RankExportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="RankExportForm.Internal.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Ranking.cs" />
+    <EmbeddedResource Include="AddDataForm.resx">
+      <DependentUpon>AddDataForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
     </EmbeddedResource>
