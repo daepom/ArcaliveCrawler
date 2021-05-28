@@ -193,9 +193,9 @@
             this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox3.Location = new System.Drawing.Point(12, 218);
             this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(248, 16);
+            this.checkBox3.Size = new System.Drawing.Size(98, 16);
             this.checkBox3.TabIndex = 20;
-            this.checkBox3.Text = "아카콘 집계 시 중복되는 아카콘들을 통합";
+            this.checkBox3.Text = "(버려진 기능)";
             this.checkBox3.UseVisualStyleBackColor = true;
             // 
             // button4

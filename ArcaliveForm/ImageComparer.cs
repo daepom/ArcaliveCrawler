@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -8,6 +10,7 @@ namespace ArcaliveForm
 {
     public static class ImageComparer
     {
+        [Obsolete("Use 'DownloadBytesFromUrl' instead")]
         public static Bitmap DownloadImageFromUrl(string url)
         {
             using (WebClient client = new WebClient())
@@ -15,18 +18,51 @@ namespace ArcaliveForm
                 client.Headers.Add("user-agent", Arcalive.ArcaliveCrawler.ArcaliveUserAgent);
                 using (Stream stream = client.OpenRead(url))
                 {
-                    //using(MemoryStream ms = new MemoryStream())
-                    //{
-                    //    byte[] buffer = new byte[16 * 2048];
-                    //    int read;
-                    //    while((read = stream.Read(buffer, 0, buffer.Length)) > 0)
-                    //    {
-                    //        ms.Write(buffer, 0, read);
-                    //    }
-                    //    return ms.ToArray();
-                    //}
-                    Bitmap bitmap = new Bitmap(stream);
-                    return bitmap;
+                    try
+                    {
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            byte[] buffer = new byte[16 * 2048];
+                            int read;
+                            while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                ms.Write(buffer, 0, read);
+                            }
+                            TypeConverter tc = TypeDescriptor.GetConverter(typeof(Bitmap));
+                            Bitmap bitmap = (Bitmap)tc.ConvertFrom(ms.ToArray());
+                            return bitmap;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        string filename = url.Split('/').Last();
+                        client.DownloadFile(url, filename);
+                        Bitmap bitmap = new Bitmap(filename);
+                        return bitmap;
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public static byte[] DownloadBytesFromUrl(string url)
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Headers.Add("user-agent", Arcalive.ArcaliveCrawler.ArcaliveUserAgent);
+                using (Stream stream = client.OpenRead(url))
+                {
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        byte[] buffer = new byte[16 * 2048];
+                        int read;
+                        while ((read = stream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            ms.Write(buffer, 0, read);
+                        }
+
+                        return ms.ToArray();
+                    }
                 }
             }
         }
