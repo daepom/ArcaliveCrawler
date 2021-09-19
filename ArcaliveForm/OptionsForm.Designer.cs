@@ -146,7 +146,6 @@
             this.Controls.Add(this.PageFindingAlgorithmGroupBox);
             this.Name = "OptionsForm";
             this.Text = "옵션";
-            this.Load += new System.EventHandler(this.OptionsForm_Load);
             this.PageFindingAlgorithmGroupBox.ResumeLayout(false);
             this.PageFindingAlgorithmGroupBox.PerformLayout();
             this.SkippingTagsGroupBox.ResumeLayout(false);

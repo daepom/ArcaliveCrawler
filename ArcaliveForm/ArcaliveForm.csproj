@@ -109,7 +109,6 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageComparer.cs" />
-    <Compile Include="OptionsCallBack.cs" />
     <Compile Include="OptionsClass.cs" />
     <Compile Include="OptionsForm.cs">
       <SubType>Form</SubType>

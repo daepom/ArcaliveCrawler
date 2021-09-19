@@ -65,10 +65,6 @@ namespace ArcaliveForm
             }));
         }
 
-        public void UpdateOptions(object sender, EventArgs arg)
-        {
-            Options = (arg as OptionsCallBack).Options;
-        }
 
         // 크롤링
         private async void button1_ClickAsync(object sender, EventArgs e)
@@ -224,11 +220,11 @@ namespace ArcaliveForm
 
         private void OptionsFormShowButton_Click(object sender, EventArgs e)
         {
-            OptionsForm options = new OptionsForm();
-            options.StartPosition = FormStartPosition.CenterParent;
-            options.OptionsCallBack += UpdateOptions;
-            options.Owner = this;
-            options.ShowDialog();
+            OptionsForm options = new OptionsForm(Options) {StartPosition = FormStartPosition.CenterParent, Owner = this};
+            if (options.ShowDialog() == DialogResult.OK)
+            {
+                Options = options.SendOptions();
+            }
         }
 
         private void TestButton_Click(object sender, EventArgs e)
