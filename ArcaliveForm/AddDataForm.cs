@@ -27,7 +27,6 @@ namespace ArcaliveForm
         // 확인 버튼
         private void button1_Click(object sender, EventArgs e)
         {
-            
             DialogResult = DialogResult.OK;
         }
 

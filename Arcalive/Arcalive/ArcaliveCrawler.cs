@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace Arcalive
 {
-    public partial class ArcaliveCrawler : IBaseCrawler<Post>
+    public partial class ArcaliveCrawler
     {
         public event EventHandler Print;
 

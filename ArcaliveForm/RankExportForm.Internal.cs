@@ -165,8 +165,8 @@ namespace ArcaliveForm
             Dictionary<string, int> arcaconDic = new Dictionary<string, int>();
             foreach (var comment in posts.SelectMany(post => post.comments))
             {
-                if (comment.isArcacon != true) continue;
-                else if (arcaconDic.ContainsKey(comment.content) == false)
+                if (comment.isArcacon == false) continue;
+                if (arcaconDic.ContainsKey(comment.content) == false)
                     arcaconDic.Add(comment.content, 1);
                 else
                     arcaconDic[comment.content]++;
