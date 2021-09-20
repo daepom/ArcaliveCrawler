@@ -6,7 +6,9 @@ namespace Crawler
 {
     public delegate int PageFinder(ArcaliveCrawler crawler, PostInfo info);
 
-    public delegate bool PostValidator(PostInfo target, PostInfo start, PostInfo end);
+    public delegate bool BoardValidator(PostInfo target, object[] args);
+
+    public delegate bool PostValidator(PostInfo target, object[] args);
     public class PostInfo
     {
         [NonSerialized] public HtmlNode boardSource;
@@ -18,15 +20,10 @@ namespace Crawler
         public string title;
         [RequiresCrawlPost]public string content;
 
-        protected virtual void DoExtraConvert()
-        {
-
-        }
 
         public static explicit operator PostInfo(HtmlNode node)
         {
             var result = new PostInfo {boardSource = node};
-            result.DoExtraConvert();
             return result;
         }
     }
@@ -36,15 +33,16 @@ namespace Crawler
     {
         public int id;
         public string badge;
+        public int view;
+        public bool restricted;
 
-        protected override void DoExtraConvert()
+        public static explicit operator ArcalivePostInfo(HtmlNode node)
         {
-            base.DoExtraConvert();
-            var s = boardSource.Attributes["href"]?.Value;
-            if (s != null)
-            {
-                href = "https://arca.live" + s.Substring(0, s.LastIndexOf('?'));
-            }
+            var result = new ArcalivePostInfo { boardSource = node };
+            string href = result.boardSource.Attributes["href"]?.Value;
+            if (href != null)
+                result.href = "https://arca.live" + href.Substring(0, href.LastIndexOf('?'));
+            return result;
         }
     }
 
