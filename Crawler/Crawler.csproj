@@ -45,9 +45,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArcaliveCrawler.cs" />
-    <Compile Include="ArcalivePost.cs" />
+    <Compile Include="ArcaliveCrawlerUtility.cs" />
     <Compile Include="ArcaliveDocDownloader.cs" />
+    <Compile Include="CommentInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PostInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
