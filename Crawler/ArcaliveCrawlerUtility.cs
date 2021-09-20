@@ -7,38 +7,6 @@ namespace Crawler
     {
         public static readonly int StartPage = 1, MaxPage = 10000;
 
-        public static void ParseData(this ArcalivePostInfo outInfo)
-        {
-            var bSource = outInfo?.boardSource;
-            if (bSource == null)
-                throw new ArgumentException("Argument or its boardSource is null");
-            string href = bSource.Attributes["href"]?.Value;
-            if (outInfo.href == null && href != null)
-                outInfo.href = "https://arca.live" + href.Substring(0, href.LastIndexOf('?'));
-            string dateString = bSource.SelectSingleNode(".//div[2]/span[2]/time")?.Attributes["datetime"]?.Value;
-            if (dateString != null)
-                outInfo.dt = DateTime.Parse(dateString);
-            if (int.TryParse(bSource.SelectSingleNode(".//div[1]/span[1]")?.InnerText, out int id))
-                outInfo.id = id;
-            string badge = bSource.SelectSingleNode(".//div[1]/span[2]/span[1]")?.InnerText;
-            if (badge != null)
-                outInfo.badge = badge;
-            string title = bSource.SelectSingleNode(".//div[1]/span[2]/span[2]")?.InnerText;
-            if (title != null)
-                outInfo.title = title;
-            string author = bSource.SelectSingleNode(".//div[2]/span[1]")?.InnerText;
-            if (author != null)
-                outInfo.author = author;
-
-
-            var pSource = outInfo.postSource;
-            if (pSource == null)
-                return;
-            var articleInfoNode = pSource.SelectSingleNode("//div[contains(@class, 'article-info')]");
-            var contentNode = pSource.SelectSingleNode("//div[contains(@class, 'fr-view article-content')]");
-            var commentNumNode = articleInfoNode.SelectSingleNode(".//span[8]");
-            var viewNumNode = articleInfoNode.SelectSingleNode(".//span[11]");
-        }
 
         public static int PageFinder_BinarySearchPageByTime(ArcaliveCrawler crawler, PostInfo info)
         {
@@ -99,15 +67,20 @@ namespace Crawler
             return currentPage;
         }
 
-        public static bool PostValidator_SkipNotices(PostInfo info, PostInfo start, PostInfo end)
+        public static bool BoardValidator_SkipNotices(PostInfo info, object[] args)
         {
-            return info?.boardSource?.Attributes["class"]?.Value != "vrow";
+            return info?.boardSource?.Attributes["class"]?.Value == "vrow";
         }
 
-        public static bool PostValidator_TestByDateTime(PostInfo info, PostInfo start, PostInfo end)
+        public static bool BoardValidator_TestByDateTime(PostInfo info, object[] args)
         {
-            DateTime startTime = start.dt, endTime = end.dt, currentTime = info.dt;
+            DateTime startTime = ((PostInfo)args[0]).dt, endTime = ((PostInfo)args[1]).dt, currentTime = info.dt;
             if (currentTime >= startTime || currentTime <= endTime) return false;
+            return true;
+        }
+
+        public static bool PostValidator_SkipByTag(PostInfo info, object[] args)
+        {
             return true;
         }
     }

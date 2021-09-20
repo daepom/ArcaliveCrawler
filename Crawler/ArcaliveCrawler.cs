@@ -1,5 +1,7 @@
-﻿using HtmlAgilityPack;
+﻿using System;
+using HtmlAgilityPack;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,7 +11,8 @@ namespace Crawler
     {
         public string BaseLink { get; private set; }
         public PageFinder PageFinder { get; private set; }
-        public List<PostValidator> PostValidators { get; private set; } = new List<PostValidator>();
+        public List<BoardValidator> BoardValidators { get; } = new List<BoardValidator>();
+        public List<PostValidator> PostValidators { get; } = new List<PostValidator>();
 
         public ArcaliveCrawler(string channelName)
         {
@@ -19,21 +22,30 @@ namespace Crawler
         public void ApplyBasicSettings()
         {
             PageFinder = ArcaliveCrawlerUtility.PageFinder_BinarySearchPageByTime;
+            BoardValidators.Clear();
+            BoardValidators.AddRange(new List<BoardValidator>
+            {
+                ArcaliveCrawlerUtility.BoardValidator_SkipNotices, ArcaliveCrawlerUtility.BoardValidator_TestByDateTime
+            });
+            PostValidators.Clear();
             PostValidators.AddRange(new List<PostValidator>
             {
-                ArcaliveCrawlerUtility.PostValidator_SkipNotices, ArcaliveCrawlerUtility.PostValidator_TestByDateTime
+
             });
         }
 
-        private bool RunPostValidators(PostInfo current, PostInfo start, PostInfo end)
+        private bool RunBoardValidators(PostInfo current, object[] args)
         {
-            return PostValidators.All(postValidator => postValidator(current, start, end));
+            return BoardValidators.All(postValidator => postValidator(current, args));
+        }
+        private bool RunPostValidators(PostInfo current, object[] args)
+        {
+            return PostValidators.All(postValidator => postValidator(current, args));
         }
 
         public IEnumerable<PostInfo> CrawlBoards(PostInfo startPostInfo, PostInfo endPostInfo)
         {
             int currentPage = PageFinder(this, startPostInfo);
-
             bool crawlNextPage;
             do
             {
@@ -41,10 +53,11 @@ namespace Crawler
                 if (string.IsNullOrEmpty(pageDoc.Text))
                     yield break;
 
-                var postNodes = pageDoc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a");
+                var postNodes = pageDoc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a")
+                    .Select(x => (ArcalivePostInfo) x).ToList();
+                Parallel.ForEach(postNodes, ArcaliveDataParser.ParsePostData);
                 var validPosts = postNodes.Where(x =>
-                    RunPostValidators((PostInfo) x, startPostInfo, endPostInfo)).Select(x => (ArcalivePostInfo) x).ToList();
-
+                    RunBoardValidators(x, new object[]{ startPostInfo , endPostInfo})).ToList();
                 foreach (var info in validPosts)
                 {
                     yield return info;
@@ -55,9 +68,20 @@ namespace Crawler
             } while (crawlNextPage);
         }
 
-        public IEnumerable<PostInfo> CrawlPosts(IEnumerable<PostInfo> posts)
+        public void CrawlPosts(IEnumerable<PostInfo> outPosts)
         {
-            if(posts == null) yield break;
+            if (outPosts == null) throw new ArgumentNullException();
+            var postInfos = outPosts.Select(x => (ArcalivePostInfo) x).ToList();
+            if (postInfos.Any(x => x.boardSource == null))
+                throw new ArgumentException("Call CrawlBoards before call this");
+            foreach (var postInfo in postInfos)
+            {
+                var postDoc = ArcaliveDocDownloader.DownloadDoc(postInfo.href);
+                if (string.IsNullOrEmpty(postDoc.Text)) continue;
+                postInfo.postSource = postDoc.DocumentNode;
+            }
+
+            Parallel.ForEach(postInfos, ArcaliveDataParser.ParsePostData);
         }
     }
 }
