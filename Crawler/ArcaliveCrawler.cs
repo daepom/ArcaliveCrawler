@@ -1,79 +1,81 @@
 ﻿using System;
-using HtmlAgilityPack;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Crawler
 {
-    public class ArcaliveCrawler
+    public class ArcaliveCrawler : BaseCrawler
     {
-        public string BaseLink { get; private set; }
-        public PageFinder PageFinder { get; private set; }
-        public List<BoardValidator> BoardValidators { get; } = new List<BoardValidator>();
-        public List<PostValidator> PostValidators { get; } = new List<PostValidator>();
-
-        public ArcaliveCrawler(string channelName)
+        public ArcaliveCrawler(string channelName) : base(channelName)
         {
-            BaseLink = "https://arca.live/b/" + channelName;
         }
 
-        public void ApplyBasicSettings()
+        public override void ApplyBasicSettings()
         {
             PageFinder = ArcaliveCrawlerUtility.PageFinder_BinarySearchPageByTime;
-            BoardValidators.Clear();
-            BoardValidators.AddRange(new List<BoardValidator>
+            _boardFilters.Clear();
+            _boardFilters.AddRange(new List<BoardFilter>
             {
-                ArcaliveCrawlerUtility.BoardValidator_SkipNotices, ArcaliveCrawlerUtility.BoardValidator_TestByDateTime
+                ArcaliveCrawlerUtility.BoardFilter_SkipNotices, ArcaliveCrawlerUtility.BoardFilter_TestByDateTime
             });
-            PostValidators.Clear();
-            PostValidators.AddRange(new List<PostValidator>
+            _postFilters.Clear();
+            _postFilters.AddRange(new List<PostFilter>
             {
-
             });
         }
-
-        private bool RunBoardValidators(PostInfo current, object[] args)
+        protected override void SetBaseLink(string str)
         {
-            return BoardValidators.All(postValidator => postValidator(current, args));
-        }
-        private bool RunPostValidators(PostInfo current, object[] args)
-        {
-            return PostValidators.All(postValidator => postValidator(current, args));
+            if (str.StartsWith("https://arca.live/b/"))
+                _baseLink = str;
+            else
+                _baseLink = "https://arca.live/b/" + str;
         }
 
-        public IEnumerable<PostInfo> CrawlBoards(PostInfo startPostInfo, PostInfo endPostInfo)
+
+        public override void CrawlBoards()
         {
-            int currentPage = PageFinder(this, startPostInfo);
+            int currentPage = PageFinder(this);
             bool crawlNextPage;
             do
             {
-                var pageDoc = ArcaliveDocDownloader.DownloadDoc(BaseLink + $"?p={currentPage}");
-                if (string.IsNullOrEmpty(pageDoc.Text))
-                    yield break;
-
-                var postNodes = pageDoc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a")
-                    .Select(x => (ArcalivePostInfo) x).ToList();
-                Parallel.ForEach(postNodes, ArcaliveDataParser.ParsePostData);
-                var validPosts = postNodes.Where(x =>
-                    RunBoardValidators(x, new object[]{ startPostInfo , endPostInfo})).ToList();
-                foreach (var info in validPosts)
+                crawlNextPage = false;
+                var posts = CrawlBoardAt(currentPage).Where(RunBoardFilters).ToList();
+                foreach (var postInfo in posts)
                 {
-                    yield return info;
+                    if (_posts.Contains(postInfo))
+                    {
+                        continue;
+                    }
+                    _posts.Add(postInfo);
+                    crawlNextPage = true;
                 }
-
-                crawlNextPage = validPosts.Any();
                 currentPage++;
             } while (crawlNextPage);
         }
 
-        public void CrawlPosts(IEnumerable<PostInfo> outPosts)
+        private IEnumerable<PostInfo> CrawlBoardAt(int page)
         {
-            if (outPosts == null) throw new ArgumentNullException();
-            var postInfos = outPosts.Select(x => (ArcalivePostInfo) x).ToList();
+            if (page < 1 || page > 10000)
+                throw new ArgumentOutOfRangeException(nameof(page), "page < 1 || page > 10000");
+            
+
+            var pageDoc = ArcaliveDocDownloader.DownloadDoc(BaseLink + $"?p={page}");
+            if (string.IsNullOrEmpty(pageDoc.Text))
+                yield break;
+
+            foreach (var info in pageDoc.DocumentNode.SelectNodes("//div[contains(@class, 'list-table')]/a").Select(x => (ArcalivePostInfo)x))
+            {
+                info.ParsePostData();
+                yield return info;
+            }
+        }
+
+        public override void CrawlPosts()
+        {
+            var postInfos = _posts.Select(x => (ArcalivePostInfo)x).ToList();
             if (postInfos.Any(x => x.boardSource == null))
-                throw new ArgumentException("Call CrawlBoards before call this");
+                throw new ArgumentException("Call CrawlBoards before call this method");
             foreach (var postInfo in postInfos)
             {
                 var postDoc = ArcaliveDocDownloader.DownloadDoc(postInfo.href);

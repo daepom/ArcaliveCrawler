@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crawler", "Crawler\Crawler.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrawlTest", "CrawlTest\CrawlTest.csproj", "{D63531D9-6BD3-4EED-BC7E-CD80A27A6BDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcaliveCrawler", "ArcaliveCrawler\ArcaliveCrawler.csproj", "{B4B07A79-EFA7-43F7-87D7-8CE06256A171}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D63531D9-6BD3-4EED-BC7E-CD80A27A6BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D63531D9-6BD3-4EED-BC7E-CD80A27A6BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D63531D9-6BD3-4EED-BC7E-CD80A27A6BDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4B07A79-EFA7-43F7-87D7-8CE06256A171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4B07A79-EFA7-43F7-87D7-8CE06256A171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4B07A79-EFA7-43F7-87D7-8CE06256A171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4B07A79-EFA7-43F7-87D7-8CE06256A171}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

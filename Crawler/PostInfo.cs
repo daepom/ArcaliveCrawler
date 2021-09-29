@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace Crawler
 {
-    public delegate int PageFinder(ArcaliveCrawler crawler, PostInfo info);
+    public delegate int PageFinder(BaseCrawler crawler);
 
-    public delegate bool BoardValidator(PostInfo target, object[] args);
+    public delegate bool BoardFilter(PostInfo target, BaseCrawler crawler);
 
-    public delegate bool PostValidator(PostInfo target, object[] args);
-    public class PostInfo
+    public delegate bool PostFilter(PostInfo target, BaseCrawler crawler);
+    public class PostInfo : IEquatable<PostInfo>
     {
         [NonSerialized] public HtmlNode boardSource;
         [NonSerialized, RequiresCrawlPost] public HtmlNode postSource;
@@ -26,6 +26,41 @@ namespace Crawler
             var result = new PostInfo {boardSource = node};
             return result;
         }
+
+        public static explicit operator PostInfo(DateTime dt)
+        {
+            var result = new PostInfo {dt = dt};
+            return result;
+        }
+
+        public bool Equals(PostInfo other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return href == other.href && dt.Equals(other.dt) && Equals(comments, other.comments) && author == other.author && title == other.title && content == other.content;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PostInfo) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (href != null ? href.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ dt.GetHashCode();
+                hashCode = (hashCode * 397) ^ (comments != null ? comments.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (author != null ? author.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (title != null ? title.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (content != null ? content.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
     }
 
     [Serializable]
@@ -39,10 +74,30 @@ namespace Crawler
         public static explicit operator ArcalivePostInfo(HtmlNode node)
         {
             var result = new ArcalivePostInfo { boardSource = node };
-            string href = result.boardSource.Attributes["href"]?.Value;
-            if (href != null)
-                result.href = "https://arca.live" + href.Substring(0, href.LastIndexOf('?'));
             return result;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ArcalivePostInfo a && Equals(a);
+        }
+
+        protected bool Equals(ArcalivePostInfo other)
+        {
+            return base.Equals(other) && id == other.id && badge == other.badge && view == other.view && restricted == other.restricted;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = base.GetHashCode();
+                hashCode = (hashCode * 397) ^ id;
+                hashCode = (hashCode * 397) ^ (badge != null ? badge.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ view;
+                hashCode = (hashCode * 397) ^ restricted.GetHashCode();
+                return hashCode;
+            }
         }
     }
 
