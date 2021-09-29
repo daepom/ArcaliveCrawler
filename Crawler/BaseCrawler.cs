@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace Crawler
         /// </summary>
         public PostInfo EndInfo { get; set; }
         public PageFinder PageFinder { get; protected set; }
+        public EventLogger Logger { get; protected set; }
         public IEnumerable<PostInfo> Posts
         {
             get
@@ -31,13 +33,18 @@ namespace Crawler
                 }
             }
         }
+
+        public virtual int AllPostsCount => _posts.Count;
+        public abstract int CrawledPostsCount { get; }
         public virtual string BaseLink {
             get => _baseLink;
         }
 
+
         protected BaseCrawler(string baseLink)
         {
             SetBaseLink(baseLink);
+            Logger = new EventLogger(this);
         }
 
         protected abstract void SetBaseLink(string str);

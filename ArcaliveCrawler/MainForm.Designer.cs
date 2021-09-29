@@ -29,45 +29,73 @@ namespace ArcaliveCrawler
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
+            this.versionCheckResultLabel = new System.Windows.Forms.Label();
+            this.CrawlButton = new System.Windows.Forms.Button();
+            this.StatExportButton = new System.Windows.Forms.Button();
             this.versionLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // label1
+            // versionCheckResultLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 13);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 12);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "label1";
+            this.versionCheckResultLabel.AutoSize = true;
+            this.versionCheckResultLabel.Location = new System.Drawing.Point(12, 249);
+            this.versionCheckResultLabel.Name = "versionCheckResultLabel";
+            this.versionCheckResultLabel.Size = new System.Drawing.Size(119, 12);
+            this.versionCheckResultLabel.TabIndex = 1;
+            this.versionCheckResultLabel.Text = "VersionCheckResult";
+            // 
+            // CrawlButton
+            // 
+            this.CrawlButton.Location = new System.Drawing.Point(12, 12);
+            this.CrawlButton.Name = "CrawlButton";
+            this.CrawlButton.Size = new System.Drawing.Size(118, 48);
+            this.CrawlButton.TabIndex = 2;
+            this.CrawlButton.Text = "1. 크롤링";
+            this.CrawlButton.UseVisualStyleBackColor = true;
+            this.CrawlButton.Click += new System.EventHandler(this.CrawlButton_Click);
+            // 
+            // StatExportButton
+            // 
+            this.StatExportButton.Location = new System.Drawing.Point(143, 12);
+            this.StatExportButton.Name = "StatExportButton";
+            this.StatExportButton.Size = new System.Drawing.Size(117, 48);
+            this.StatExportButton.TabIndex = 3;
+            this.StatExportButton.Text = "2. 통계 출력";
+            this.StatExportButton.UseVisualStyleBackColor = true;
+            this.StatExportButton.Click += new System.EventHandler(this.StatExportButton_Click);
             // 
             // versionLabel
             // 
             this.versionLabel.AutoSize = true;
-            this.versionLabel.Location = new System.Drawing.Point(12, 429);
+            this.versionLabel.Location = new System.Drawing.Point(202, 249);
             this.versionLabel.Name = "versionLabel";
-            this.versionLabel.Size = new System.Drawing.Size(96, 12);
-            this.versionLabel.TabIndex = 1;
-            this.versionLabel.Text = "VERSIONLABEL";
+            this.versionLabel.Size = new System.Drawing.Size(58, 12);
+            this.versionLabel.TabIndex = 4;
+            this.versionLabel.Text = "VERSION";
+            this.versionLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(412, 450);
+            this.ClientSize = new System.Drawing.Size(272, 270);
             this.Controls.Add(this.versionLabel);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.StatExportButton);
+            this.Controls.Add(this.CrawlButton);
+            this.Controls.Add(this.versionCheckResultLabel);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "MainForm";
-            this.Text = "아카라이브 크롤러";
+            this.Text = "아카크롤러 2";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label versionCheckResultLabel;
+        private System.Windows.Forms.Button CrawlButton;
+        private System.Windows.Forms.Button StatExportButton;
         private System.Windows.Forms.Label versionLabel;
     }
 }

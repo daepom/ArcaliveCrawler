@@ -114,7 +114,7 @@ namespace ArcaliveForm
                 posts = ac.CrawlBoards(startDate, endDate, startPage);
                 posts = ac.CrawlPosts(posts, skip);
             });
-            await Task.WhenAll(task);
+            await task;
 
             notifyIcon1.ShowBalloonTip(1000, "아카라이브 크롤러", "크롤링 완료", ToolTipIcon.Info);
 

@@ -9,6 +9,8 @@ namespace Crawler
     public delegate bool BoardFilter(PostInfo target, BaseCrawler crawler);
 
     public delegate bool PostFilter(PostInfo target, BaseCrawler crawler);
+
+    [Serializable]
     public class PostInfo : IEquatable<PostInfo>
     {
         [NonSerialized] public HtmlNode boardSource;
@@ -19,6 +21,7 @@ namespace Crawler
         public string author;
         public string title;
         [RequiresCrawlPost]public string content;
+        [NonSerialized] public bool completed;
 
 
         public static explicit operator PostInfo(HtmlNode node)
@@ -31,6 +34,12 @@ namespace Crawler
         {
             var result = new PostInfo {dt = dt};
             return result;
+        }
+
+        public void ClearSourceData()
+        {
+            boardSource = null;
+            postSource = null;
         }
 
         public bool Equals(PostInfo other)

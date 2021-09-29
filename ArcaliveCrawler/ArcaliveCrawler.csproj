@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,8 +32,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>8</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>022_21.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="HtmlAgilityPack, Version=1.11.37.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.37\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,6 +54,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddDataForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddDataForm.Designer.cs">
+      <DependentUpon>AddDataForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CrawlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CrawlForm.Designer.cs">
+      <DependentUpon>CrawlForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -54,6 +74,36 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RankExportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RankExportForm.Designer.cs">
+      <DependentUpon>RankExportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RankExportForm.Internal.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\AlertForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\AlertForm.Designer.cs">
+      <DependentUpon>AlertForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\ArcaconPack.cs" />
+    <Compile Include="Utils\EstimatedTimeCalculator.cs" />
+    <Compile Include="Utils\ProgressArcaconRankForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\ProgressArcaconRankForm.Designer.cs">
+      <DependentUpon>ProgressArcaconRankForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\Ranking.cs" />
+    <EmbeddedResource Include="AddDataForm.resx">
+      <DependentUpon>AddDataForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CrawlForm.resx">
+      <DependentUpon>CrawlForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -66,6 +116,16 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="RankExportForm.resx">
+      <DependentUpon>RankExportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utils\AlertForm.resx">
+      <DependentUpon>AlertForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utils\ProgressArcaconRankForm.resx">
+      <DependentUpon>ProgressArcaconRankForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -84,6 +144,12 @@
       <Project>{b90853dc-7be0-46dd-8cf8-49c7270ecc99}</Project>
       <Name>Crawler</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="022_21.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="RankExportForms\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

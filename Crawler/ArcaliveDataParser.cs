@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Crawler
 {
@@ -48,7 +49,7 @@ namespace Crawler
             var viewNumNode = articleInfoNode.SelectSingleNode(".//span[11]");
             outInfo.content = contentNode.InnerText;
             outInfo.view = int.Parse(viewNumNode.InnerText);
-            if (int.Parse(commentNumNode.InnerText) == 0) return;
+            if (int.Parse(commentNumNode.InnerText) == 0) goto Done;
             var comments = outInfo.comments;
             if (pSource.SelectSingleNode("//div[contains(@class, 'pagination-wrapper my-2')]") != null)
             {
@@ -68,16 +69,24 @@ namespace Crawler
                 var commentAreaNode = pSource.SelectSingleNode("//div[contains(@class, 'list-area')]");
                 comments.AddRange(ParseCommentData(commentAreaNode));
             }
+
+            Done:
+            outInfo.ClearSourceData();
+            outInfo.completed = true;
         }
 
-        private static IEnumerable<CommentInfo> ParseCommentData(HtmlNode commentNode)
+        private static List<CommentInfo> ParseCommentData(HtmlNode commentNode)
         {
             var commentWrappers = commentNode?.Descendants(0)?
-                .Where(n => n.HasClass("comment-item"));
-            if(commentWrappers == null)
-                yield break;
-
-            foreach (var commentWrapper in commentWrappers)
+                .Where(n => n.HasClass("comment-item")).ToList();
+            if (commentWrappers == null)
+                return new List<CommentInfo>();
+            var lst = new List<CommentInfo>(commentWrappers.Count);
+            for (int i = 0; i < commentWrappers.Count; i++)
+            {
+                lst.Add(null);
+            }
+            ArcaliveCommentInfo ParseComment(HtmlNode commentWrapper)
             {
                 var c = new ArcaliveCommentInfo();
                 var author = commentWrapper.SelectSingleNode(".//div/div[1]/span").InnerText;
@@ -107,8 +116,19 @@ namespace Crawler
                 }
                 c.author = author;
                 c.dt = time;
-                yield return c;
+                return c;
             }
+
+            //for (int i = 0; i < lst.Count; i++)
+            //{
+            //    lst[i] = ParseComment(commentWrappers[i]);
+            //}
+
+            Parallel.For(0, lst.Count, i =>
+            {
+                lst[i] = ParseComment(commentWrappers[i]);
+            });
+            return lst;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.Reflection;
 
 namespace Crawler
 {
@@ -10,6 +11,8 @@ namespace Crawler
 
         public static int PageFinder_BinarySearchPageByTime(BaseCrawler crawler)
         {
+            crawler.Logger.Log(MethodBase.GetCurrentMethod().Name, "Start");
+
             DateTime TimeofFirstPost, TimeofLastPost, TargetTime = crawler.StartInfo.dt;
             bool found = false;
             int StartPage = ArcaliveCrawlerUtility.StartPage, MaxPage = ArcaliveCrawlerUtility.MaxPage;
@@ -64,6 +67,7 @@ namespace Crawler
                 }
             }
 
+            crawler.Logger.Log(MethodBase.GetCurrentMethod().Name, "Found!", currentPage);
             return currentPage;
         }
 
@@ -80,6 +84,27 @@ namespace Crawler
 
         public static bool PostFilter_SkipByTag(PostInfo info, BaseCrawler crawler)
         {
+            return true;
+        }
+
+        public static bool TestCrawl(string link, out string result)
+        {
+            Console.WriteLine(link);
+            result = string.Empty;
+            try
+            {
+                var testDoc = ArcaliveDocDownloader.DownloadDoc(link);
+                var node = testDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'board-title')]/a[2]");
+                if (node?.InnerText == null)
+                    return false;
+                result = node.InnerText;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+
             return true;
         }
     }
