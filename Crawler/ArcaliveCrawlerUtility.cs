@@ -8,9 +8,9 @@ namespace Crawler
         public static readonly int StartPage = 1, MaxPage = 10000;
 
 
-        public static int PageFinder_BinarySearchPageByTime(ArcaliveCrawler crawler, PostInfo info)
+        public static int PageFinder_BinarySearchPageByTime(BaseCrawler crawler)
         {
-            DateTime TimeofFirstPost, TimeofLastPost, TargetTime = info.dt;
+            DateTime TimeofFirstPost, TimeofLastPost, TargetTime = crawler.StartInfo.dt;
             bool found = false;
             int StartPage = ArcaliveCrawlerUtility.StartPage, MaxPage = ArcaliveCrawlerUtility.MaxPage;
             int currentPage = -1;
@@ -67,19 +67,18 @@ namespace Crawler
             return currentPage;
         }
 
-        public static bool BoardValidator_SkipNotices(PostInfo info, object[] args)
+        public static bool BoardFilter_SkipNotices(PostInfo info, BaseCrawler crawler)
         {
             return info?.boardSource?.Attributes["class"]?.Value == "vrow";
         }
 
-        public static bool BoardValidator_TestByDateTime(PostInfo info, object[] args)
+        public static bool BoardFilter_TestByDateTime(PostInfo info, BaseCrawler crawler)
         {
-            DateTime startTime = ((PostInfo)args[0]).dt, endTime = ((PostInfo)args[1]).dt, currentTime = info.dt;
-            if (currentTime >= startTime || currentTime <= endTime) return false;
-            return true;
+            DateTime startTime = crawler.StartInfo.dt, endTime = crawler.EndInfo.dt, currentTime = info.dt;
+            return currentTime < startTime && currentTime > endTime;
         }
 
-        public static bool PostValidator_SkipByTag(PostInfo info, object[] args)
+        public static bool PostFilter_SkipByTag(PostInfo info, BaseCrawler crawler)
         {
             return true;
         }

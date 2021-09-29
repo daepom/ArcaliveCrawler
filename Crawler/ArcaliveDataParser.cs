@@ -70,7 +70,7 @@ namespace Crawler
             }
         }
 
-        public static IEnumerable<CommentInfo> ParseCommentData(HtmlNode commentNode)
+        private static IEnumerable<CommentInfo> ParseCommentData(HtmlNode commentNode)
         {
             var commentWrappers = commentNode?.Descendants(0)?
                 .Where(n => n.HasClass("comment-item"));

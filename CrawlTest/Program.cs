@@ -11,14 +11,15 @@ namespace CrawlTest
     {
         static void Main(string[] args)
         {
-            ArcaliveCrawler ac = new ArcaliveCrawler("momoirocode");
-            ac.ApplyBasicSettings();
-            var start = new PostInfo() { dt = DateTime.Now };
-            var end = new PostInfo() { dt = DateTime.Now.AddHours(-1) }; 
-            List<PostInfo> posts = new List<PostInfo>();
-            posts.AddRange(ac.CrawlBoards(start, end));
-            ac.CrawlPosts(posts);
-            Console.WriteLine(posts.Count+"End");
+            BaseCrawler crawler = new ArcaliveCrawler("momoirocode");
+            crawler.ApplyBasicSettings();
+            var start = (PostInfo) DateTime.Now;
+            var end = (PostInfo) DateTime.Now.AddMinutes(-120);
+            crawler.StartInfo = start;
+            crawler.EndInfo = end;
+            crawler.CrawlBoards();
+            crawler.CrawlPosts();
+            Console.WriteLine(crawler.Posts.ToList().Count);
             Console.ReadKey();
         }
     }
