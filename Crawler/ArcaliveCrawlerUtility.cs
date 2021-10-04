@@ -11,7 +11,7 @@ namespace Crawler
 
         public static int PageFinder_BinarySearchPageByTime(BaseCrawler crawler)
         {
-            crawler.Logger.Log(MethodBase.GetCurrentMethod().Name, "Start");
+            //crawler.Logger.Log(MethodBase.GetCurrentMethod().Name, "Start");
 
             DateTime TimeofFirstPost, TimeofLastPost, TargetTime = crawler.StartInfo.dt;
             bool found = false;
@@ -67,7 +67,7 @@ namespace Crawler
                 }
             }
 
-            crawler.Logger.Log(MethodBase.GetCurrentMethod().Name, "Found!", currentPage);
+            //crawler.Logger.Log(MethodBase.GetCurrentMethod().Name, "Found!", currentPage);
             return currentPage;
         }
 

@@ -1,20 +1,21 @@
-﻿using Crawler;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using ArcaliveCrawler.Statistics;
+using ArcaliveCrawler.Utils;
+using Crawler;
 
-namespace ArcaliveForm
+namespace ArcaliveCrawler
 {
     public partial class RankExportForm : Form
     {
         private List<PostInfo> _datafile;
         public List<DateTime> StartTimes { get; set; }
         public List<DateTime> EndTimes { get; set; }
+        private StatisticsMaker statisticsMaker;
 
         public List<PostInfo> DataFile
         {
@@ -53,6 +54,51 @@ namespace ArcaliveForm
         {
             comboBox1.SelectedItem = comboBox1.Items[0];
             comboBox2.SelectedItem = comboBox2.Items[0];
+            statSelectionComboBox.Items.Add("선택되지 않음");
+            statSelectionComboBox.SelectedIndex = 0;
+
+            StatisticsMakerDatabase.InitDatabase();
+            foreach (var maker in StatisticsMakerDatabase.StatisticsMakers.OrderBy(x => x.Name))
+            {
+                statSelectionComboBox.Items.Add(maker.Name);
+            }
+        }
+
+        private void statExportButton_Click(object sender, EventArgs e)
+        {
+            string name = statSelectionComboBox.SelectedItem.ToString();
+            var stat = StatisticsMakerDatabase.GetNamed(name);
+            int cnt;
+            if (StartTimes == null || checkBox1.Checked == false)
+                cnt = 1;
+            else
+                cnt = StartTimes.Count;
+            for (int i = 0; i < cnt; i++)
+            {
+                var dataFile = GetDataFile(i);
+                if (name.Contains("아카콘 종류별"))
+                {
+                    ProgressArcaconRankForm f = new ProgressArcaconRankForm(dataFile)
+                    {
+                        StartPosition = FormStartPosition.CenterParent
+                    };
+                    f.ShowDialog();
+                    SaveTextFile(f.Result);
+                    return;
+                }
+
+                stat.Posts = dataFile;
+                SaveTextFile(stat.MakeStatistics().ToString());
+            }
+            
+        }
+
+        private void statSelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (statSelectionComboBox.SelectedIndex > 0)
+                statExportButton.Enabled = true;
+            else
+                statExportButton.Enabled = false;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
@@ -117,7 +163,6 @@ namespace ArcaliveForm
         // 갤창 랭킹
         private void button1_Click(object sender, EventArgs e)
         {
-
             int cnt;
             if (StartTimes == null || checkBox1.Checked == false)
                 cnt = 1;
@@ -125,7 +170,8 @@ namespace ArcaliveForm
                 cnt = StartTimes.Count;
             for (int i = 0; i < cnt; i++)
             {
-                SaveTextFile(ExportRank1(i));
+                statisticsMaker = new StatisticsMaker_UserRanking(GetDataFile(i));
+                SaveTextFile(statisticsMaker.MakeStatistics().ToString());
             }
         }
 
@@ -139,7 +185,11 @@ namespace ArcaliveForm
                 cnt = StartTimes.Count;
             for (int i = 0; i < cnt; i++)
             {
-                SaveTextFile(ExportRank2(i));
+                var dataFile = GetDataFile(i);
+                string str = (new StatisticsMaker_TimeRankingByTime(dataFile).MakeStatistics().ToString()) +
+                             (new StatisticsMaker_TimeRankingByDay(dataFile).MakeStatistics()) +
+                             (new StatisticsMaker_TimeRankingByDate(dataFile).MakeStatistics());
+                SaveTextFile(str);
             }
         }
 
@@ -153,7 +203,8 @@ namespace ArcaliveForm
                 cnt = StartTimes.Count;
             for (int i = 0; i < cnt; i++)
             {
-                SaveTextFile(ExportRank3(i));
+                statisticsMaker = new StatisticsMaker_ArcaconIndividualRanking(GetDataFile(i));
+                SaveTextFile(statisticsMaker.MakeStatistics().ToString());
             }
         }
 
@@ -167,7 +218,8 @@ namespace ArcaliveForm
                 cnt = StartTimes.Count;
             for (int i = 0; i < cnt; i++)
             {
-                SaveTextFile(ExportRank4(i));
+                statisticsMaker = new StatisticsMaker_ArcaconByTypeRanking(GetDataFile(i));
+                SaveTextFile(statisticsMaker.MakeStatistics().ToString());
             }
         }
 
@@ -227,5 +279,7 @@ namespace ArcaliveForm
             StartTimes = null;
             EndTimes = null;
         }
+
+
     }
 }

@@ -80,9 +80,13 @@
     <Compile Include="RankExportForm.Designer.cs">
       <DependentUpon>RankExportForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="RankExportForm.Internal.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Statistics\Statistics.cs" />
+    <Compile Include="Statistics\StatisticsMaker.cs" />
+    <Compile Include="Statistics\StatisticsMaker_ArcaconByTypeRanking.cs" />
+    <Compile Include="Statistics\StatisticsMaker_ArcaconIndividualRanking.cs" />
+    <Compile Include="Statistics\StatisticsMaker_TimeRanking.cs" />
+    <Compile Include="Statistics\StatisticsMaker_UserRanking.cs" />
+    <Compile Include="Statistics\StatisticsMakerDatabase.cs" />
     <Compile Include="Utils\AlertForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,13 +95,13 @@
     </Compile>
     <Compile Include="Utils\ArcaconPack.cs" />
     <Compile Include="Utils\EstimatedTimeCalculator.cs" />
+    <Compile Include="Utils\GithubVersionChecker.cs" />
     <Compile Include="Utils\ProgressArcaconRankForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Utils\ProgressArcaconRankForm.Designer.cs">
       <DependentUpon>ProgressArcaconRankForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utils\Ranking.cs" />
     <EmbeddedResource Include="AddDataForm.resx">
       <DependentUpon>AddDataForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -148,8 +152,6 @@
   <ItemGroup>
     <Content Include="022_21.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="RankExportForms\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

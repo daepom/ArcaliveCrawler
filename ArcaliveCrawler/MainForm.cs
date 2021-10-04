@@ -5,10 +5,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ArcaliveForm;
+using ArcaliveCrawler.Utils;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace ArcaliveCrawler
@@ -23,21 +24,16 @@ namespace ArcaliveCrawler
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            versionLabel.Text = currentVersion;
+            var builtTime = System.IO.File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location).ToString("yyyy/MM/dd HH시mm분에 빌드됨");
+            versionLabel.Text = currentVersion + ", ";
+            builtTimeLabel.Text = builtTime;
             #region 버전 체크
 
             try
             {
-                string tmp = string.Empty;
-                using (WebClient wc = new WebClient())
-                {
-                    tmp = wc.DownloadString("https://github.com/csh1668/ArcaliveCrawler/releases");
-                }
-
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(tmp);
-                var releases = doc.DocumentNode.SelectNodes("//div[contains(@class, 'release-entry')]");
-                var latestRelease = releases[0].SelectSingleNode("//div[contains(@class, 'd-flex flex-items-start')]/div[1]/a").InnerText;
+                GithubVersionChecker vc =
+                    new GithubVersionChecker("https://github.com/csh1668/ArcaliveCrawler/releases");
+                string latestRelease = vc.LatestRelease;
 
                 if (currentVersion == latestRelease)
                     linkLabel1.Text = "최신 버전입니다";
@@ -69,6 +65,11 @@ namespace ArcaliveCrawler
                 StartPosition = FormStartPosition.CenterParent
             };
             f.ShowDialog();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/csh1668/ArcaliveCrawler/releases");
         }
     }
 }

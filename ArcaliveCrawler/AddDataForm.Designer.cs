@@ -1,5 +1,5 @@
 ﻿
-namespace ArcaliveForm
+namespace ArcaliveCrawler
 {
     partial class AddDataForm
     {

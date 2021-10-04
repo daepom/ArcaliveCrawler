@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Crawler
@@ -94,17 +95,21 @@ namespace Crawler
             var postInfos = _posts.Select(x => (ArcalivePostInfo)x).ToList();
             if (postInfos.Any(x => x.boardSource == null))
                 throw new ArgumentException("Call CrawlBoards before call this method");
+            Task t = null;
             foreach (var postInfo in postInfos)
             {
                 var postDoc = ArcaliveDocDownloader.DownloadDoc(postInfo.href);
                 if (string.IsNullOrEmpty(postDoc.Text)) continue;
                 postInfo.postSource = postDoc.DocumentNode;
-                Task.Factory.StartNew(() =>
+                t = Task.Factory.StartNew(() =>
                 {
                     postInfo.ParsePostData();
                 });
                 Logger.Log(MethodBase.GetCurrentMethod().Name, postInfo.id);
             }
+
+            t.Wait();
+            Logger.Log(MethodBase.GetCurrentMethod().Name, "크롤링 완료!");
         }
     }
 }

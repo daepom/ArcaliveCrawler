@@ -1,5 +1,4 @@
-﻿using ArcaliveForm;
-using Crawler;
+﻿using Crawler;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,7 +12,7 @@ namespace ArcaliveCrawler.Utils
     public partial class ProgressArcaconRankForm : Form
     {
         private List<PostInfo> posts;
-        public string Result = String.Empty;
+        public string Result = string.Empty;
 
         public ProgressArcaconRankForm(List<PostInfo> posts)
         {
@@ -25,6 +24,7 @@ namespace ArcaliveCrawler.Utils
         {
             var t = Task.Factory.StartNew(() =>
             {
+                Console.Write("asd???");
                 Result = Do();
             });
             await t;
@@ -77,7 +77,7 @@ namespace ArcaliveCrawler.Utils
 
                     // 아카콘 추가
                     var redirectedUrl = ArcaliveDocDownloader.RedirectedUrl("https://arca.live/api/emoticon/shop/" + currentArcacon.dataid,
-                        term: 100, doc: out var doc);
+                        term: 5, doc: out var doc);
                     var number = int.Parse(redirectedUrl.Split('/').Last());
                     memoDic.Add(currentArcacon, number);
 
@@ -112,7 +112,7 @@ namespace ArcaliveCrawler.Utils
                     arcaconPacks.Add(newArcaconPack);
                 }
 
-            OUT:;
+                OUT:;
             }
 
             // 실제 링크, 집계수
