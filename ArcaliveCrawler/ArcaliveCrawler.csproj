@@ -94,6 +94,12 @@
       <DependentUpon>AlertForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utils\ArcaconPack.cs" />
+    <Compile Include="Utils\ArcaconUseStatForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\ArcaconUseStatForm.Designer.cs">
+      <DependentUpon>ArcaconUseStatForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utils\EstimatedTimeCalculator.cs" />
     <Compile Include="Utils\GithubVersionChecker.cs" />
     <Compile Include="Utils\ProgressArcaconRankForm.cs">
@@ -125,6 +131,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Utils\AlertForm.resx">
       <DependentUpon>AlertForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utils\ArcaconUseStatForm.resx">
+      <DependentUpon>ArcaconUseStatForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Utils\ProgressArcaconRankForm.resx">
       <DependentUpon>ProgressArcaconRankForm.cs</DependentUpon>

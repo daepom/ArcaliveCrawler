@@ -86,8 +86,8 @@ namespace ArcaliveCrawler.Utils
                         continue;
 
                     // 메모
-                    var arcaconNodesImg = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/img");
-                    var arcaconNodesVid = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/video");
+                    var arcaconNodesImg = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/div/img");
+                    var arcaconNodesVid = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/div/video");
                     var newArcaconPack = new ArcaconPack(number);
                     if (arcaconNodesImg != null)
                     {

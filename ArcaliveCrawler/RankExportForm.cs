@@ -160,69 +160,6 @@ namespace ArcaliveCrawler
             }
         }
 
-        // 갤창 랭킹
-        private void button1_Click(object sender, EventArgs e)
-        {
-            int cnt;
-            if (StartTimes == null || checkBox1.Checked == false)
-                cnt = 1;
-            else
-                cnt = StartTimes.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                statisticsMaker = new StatisticsMaker_UserRanking(GetDataFile(i));
-                SaveTextFile(statisticsMaker.MakeStatistics().ToString());
-            }
-        }
-
-        // 시간별
-        private void button2_Click(object sender, EventArgs e)
-        {
-            int cnt;
-            if (StartTimes == null || checkBox1.Checked == false)
-                cnt = 1;
-            else
-                cnt = StartTimes.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                var dataFile = GetDataFile(i);
-                string str = (new StatisticsMaker_TimeRankingByTime(dataFile).MakeStatistics().ToString()) +
-                             (new StatisticsMaker_TimeRankingByDay(dataFile).MakeStatistics()) +
-                             (new StatisticsMaker_TimeRankingByDate(dataFile).MakeStatistics());
-                SaveTextFile(str);
-            }
-        }
-
-        // 아카콘 랭킹
-        private void button3_Click(object sender, EventArgs e)
-        {
-            int cnt;
-            if (StartTimes == null || checkBox1.Checked == false)
-                cnt = 1;
-            else
-                cnt = StartTimes.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                statisticsMaker = new StatisticsMaker_ArcaconIndividualRanking(GetDataFile(i));
-                SaveTextFile(statisticsMaker.MakeStatistics().ToString());
-            }
-        }
-
-        // 아카콘 종류별 랭킹
-        private void button4_Click(object sender, EventArgs e)
-        {
-            int cnt;
-            if (StartTimes == null || checkBox1.Checked == false)
-                cnt = 1;
-            else
-                cnt = StartTimes.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                statisticsMaker = new StatisticsMaker_ArcaconByTypeRanking(GetDataFile(i));
-                SaveTextFile(statisticsMaker.MakeStatistics().ToString());
-            }
-        }
-
         private void FileChooseButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog

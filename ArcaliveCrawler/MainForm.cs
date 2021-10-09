@@ -71,5 +71,14 @@ namespace ArcaliveCrawler
         {
             System.Diagnostics.Process.Start("https://github.com/csh1668/ArcaliveCrawler/releases");
         }
+
+        private void ArcaconUseStatExportButton_Click(object sender, EventArgs e)
+        {
+            Form f = new ArcaconUseStatForm()
+            {
+                StartPosition = FormStartPosition.CenterParent
+            };
+            f.ShowDialog();
+        }
     }
 }

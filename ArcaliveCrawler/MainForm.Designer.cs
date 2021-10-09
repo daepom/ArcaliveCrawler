@@ -34,6 +34,7 @@ namespace ArcaliveCrawler
             this.versionLabel = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.builtTimeLabel = new System.Windows.Forms.Label();
+            this.ArcaconUseStatExportButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CrawlButton
@@ -87,11 +88,22 @@ namespace ArcaliveCrawler
             this.builtTimeLabel.Text = "BUILTTIME";
             this.builtTimeLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
+            // ArcaconUseStatExportButton
+            // 
+            this.ArcaconUseStatExportButton.Location = new System.Drawing.Point(12, 66);
+            this.ArcaconUseStatExportButton.Name = "ArcaconUseStatExportButton";
+            this.ArcaconUseStatExportButton.Size = new System.Drawing.Size(118, 48);
+            this.ArcaconUseStatExportButton.TabIndex = 7;
+            this.ArcaconUseStatExportButton.Text = "기타1. 아카콘 사용 현황 출력";
+            this.ArcaconUseStatExportButton.UseVisualStyleBackColor = true;
+            this.ArcaconUseStatExportButton.Click += new System.EventHandler(this.ArcaconUseStatExportButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(272, 270);
+            this.Controls.Add(this.ArcaconUseStatExportButton);
             this.Controls.Add(this.builtTimeLabel);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.versionLabel);
@@ -112,6 +124,7 @@ namespace ArcaliveCrawler
         private System.Windows.Forms.Label versionLabel;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Label builtTimeLabel;
+        private System.Windows.Forms.Button ArcaconUseStatExportButton;
     }
 }
 

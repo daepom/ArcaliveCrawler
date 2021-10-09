@@ -60,6 +60,7 @@
             // 
             // comboBox1
             // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
             "txt",
@@ -89,6 +90,7 @@
             // 
             // comboBox2
             // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Items.AddRange(new object[] {
             "UTF-8",
@@ -187,6 +189,7 @@
             // 
             // statSelectionComboBox
             // 
+            this.statSelectionComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.statSelectionComboBox.FormattingEnabled = true;
             this.statSelectionComboBox.Location = new System.Drawing.Point(113, 257);
             this.statSelectionComboBox.Name = "statSelectionComboBox";
