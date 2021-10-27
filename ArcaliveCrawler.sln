@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arcalive", "Arcalive\Arcalive\Arcalive.csproj", "{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcaliveForm", "ArcaliveForm\ArcaliveForm.csproj", "{A17C42AC-E332-495F-B1F0-113BD9785A89}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crawler", "Crawler\Crawler.csproj", "{B90853DC-7BE0-46DD-8CF8-49C7270ECC99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrawlTest", "CrawlTest\CrawlTest.csproj", "{D63531D9-6BD3-4EED-BC7E-CD80A27A6BDA}"
@@ -23,10 +21,6 @@ Global
 		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CACC011-16C4-4F2A-AC03-57B6D828C4B5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A17C42AC-E332-495F-B1F0-113BD9785A89}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B90853DC-7BE0-46DD-8CF8-49C7270ECC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B90853DC-7BE0-46DD-8CF8-49C7270ECC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B90853DC-7BE0-46DD-8CF8-49C7270ECC99}.Release|Any CPU.ActiveCfg = Release|Any CPU

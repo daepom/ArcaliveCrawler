@@ -29,8 +29,8 @@ namespace ArcaliveCrawler.Utils
 
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(tmp);
-                var releases = doc.DocumentNode.SelectNodes("//div[contains(@class, 'release-entry')]");
-                var latestRelease = releases[0].SelectSingleNode("//div[contains(@class, 'd-flex flex-items-start')]/div[1]/a").InnerText;
+                var releases = doc.DocumentNode.SelectNodes("//*[@id=\"repo-content-pjax-container\"]/div[2]/div");
+                var latestRelease = releases[0].SelectSingleNode(".//div[1]/div[3]/a/div/span").InnerText.Trim();
                 return latestRelease;
             }
         }

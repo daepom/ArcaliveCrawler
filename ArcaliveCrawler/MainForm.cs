@@ -16,7 +16,7 @@ namespace ArcaliveCrawler
 {
     public partial class MainForm : Form
     {
-        public string currentVersion = "2.0";
+        public string currentVersion = "2.0.1";
         public MainForm()
         {
             InitializeComponent();
@@ -25,7 +25,7 @@ namespace ArcaliveCrawler
         private void MainForm_Load(object sender, EventArgs e)
         {
             var builtTime = System.IO.File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location).ToString("yyyy/MM/dd HH시mm분에 빌드됨");
-            versionLabel.Text = currentVersion + ", ";
+            versionLabel.Text = currentVersion;
             builtTimeLabel.Text = builtTime;
             #region 버전 체크
 
@@ -34,6 +34,7 @@ namespace ArcaliveCrawler
                 GithubVersionChecker vc =
                     new GithubVersionChecker("https://github.com/csh1668/ArcaliveCrawler/releases");
                 string latestRelease = vc.LatestRelease;
+                Console.WriteLine(latestRelease);
 
                 if (currentVersion == latestRelease)
                     linkLabel1.Text = "최신 버전입니다";

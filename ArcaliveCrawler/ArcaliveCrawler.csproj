@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -86,7 +87,8 @@
     <Compile Include="Statistics\StatisticsMaker_ArcaconIndividualRanking.cs" />
     <Compile Include="Statistics\StatisticsMaker_TimeRanking.cs" />
     <Compile Include="Statistics\StatisticsMaker_UserRanking.cs" />
-    <Compile Include="Statistics\StatisticsMakerDatabase.cs" />
+    <Compile Include="Statistics\GenDatabase.cs" />
+    <Compile Include="Statistics\StatisticsMaker_ViewByBadge.cs" />
     <Compile Include="Utils\AlertForm.cs">
       <SubType>Form</SubType>
     </Compile>

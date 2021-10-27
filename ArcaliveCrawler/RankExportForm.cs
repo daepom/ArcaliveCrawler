@@ -57,8 +57,8 @@ namespace ArcaliveCrawler
             statSelectionComboBox.Items.Add("선택되지 않음");
             statSelectionComboBox.SelectedIndex = 0;
 
-            StatisticsMakerDatabase.InitDatabase();
-            foreach (var maker in StatisticsMakerDatabase.StatisticsMakers.OrderBy(x => x.Name))
+            GenDatabase<StatisticsMaker>.InitDatabase();
+            foreach (var maker in GenDatabase<StatisticsMaker>.StatisticsMakers.OrderBy(x => x.Name))
             {
                 statSelectionComboBox.Items.Add(maker.Name);
             }
@@ -67,7 +67,7 @@ namespace ArcaliveCrawler
         private void statExportButton_Click(object sender, EventArgs e)
         {
             string name = statSelectionComboBox.SelectedItem.ToString();
-            var stat = StatisticsMakerDatabase.GetNamed(name);
+            var stat = GenDatabase<StatisticsMaker>.GetNamed(name);
             int cnt;
             if (StartTimes == null || checkBox1.Checked == false)
                 cnt = 1;

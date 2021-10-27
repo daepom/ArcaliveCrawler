@@ -5,7 +5,7 @@ using Crawler;
 
 namespace ArcaliveCrawler.Statistics
 {
-    public abstract class StatisticsMaker
+    public abstract class StatisticsMaker : INameable
     {
         public abstract string Name { get; }
         public List<PostInfo> Posts { get; set; }
