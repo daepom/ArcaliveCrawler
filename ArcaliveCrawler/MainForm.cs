@@ -81,5 +81,14 @@ namespace ArcaliveCrawler
             };
             f.ShowDialog();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Form f = new WordCloudTextExportForm()
+            {
+                StartPosition = FormStartPosition.CenterParent
+            };
+            f.ShowDialog();
+        }
     }
 }

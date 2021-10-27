@@ -35,6 +35,7 @@ namespace ArcaliveCrawler
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.builtTimeLabel = new System.Windows.Forms.Label();
             this.ArcaconUseStatExportButton = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CrawlButton
@@ -98,11 +99,22 @@ namespace ArcaliveCrawler
             this.ArcaconUseStatExportButton.UseVisualStyleBackColor = true;
             this.ArcaconUseStatExportButton.Click += new System.EventHandler(this.ArcaconUseStatExportButton_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(143, 66);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(117, 48);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "기타2. 워드 클라우드용 텍스트 출력";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(272, 270);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.ArcaconUseStatExportButton);
             this.Controls.Add(this.builtTimeLabel);
             this.Controls.Add(this.linkLabel1);
@@ -125,6 +137,7 @@ namespace ArcaliveCrawler
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Label builtTimeLabel;
         private System.Windows.Forms.Button ArcaconUseStatExportButton;
+        private System.Windows.Forms.Button button1;
     }
 }
 

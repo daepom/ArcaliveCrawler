@@ -110,6 +110,12 @@
     <Compile Include="Utils\ProgressArcaconRankForm.Designer.cs">
       <DependentUpon>ProgressArcaconRankForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\WordCloudTextExportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\WordCloudTextExportForm.Designer.cs">
+      <DependentUpon>WordCloudTextExportForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AddDataForm.resx">
       <DependentUpon>AddDataForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -139,6 +145,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Utils\ProgressArcaconRankForm.resx">
       <DependentUpon>ProgressArcaconRankForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utils\WordCloudTextExportForm.resx">
+      <DependentUpon>WordCloudTextExportForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
