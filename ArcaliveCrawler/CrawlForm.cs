@@ -51,6 +51,16 @@ namespace ArcaliveCrawler
                 MessageBox.Show("잘못된 날짜 선택입니다." + Environment.NewLine + "'가장 최근 글 정보'는 '가장 오래된 글 정보'보다 이후 시간대여야 합니다. ", "에러");
                 return;
             }
+            if (start - end >= TimeSpan.FromDays(60))
+            {
+                if (MessageBox.Show("너무 긴 기간의 설정은 에러를 불러일으킬 수 있습니다. " + Environment.NewLine +
+                                    "한 달 단위로 크롤링 한 뒤에, 데이터 파일 병합 기능의 사용을 권장합니다." + Environment.NewLine +
+                                    "계속 하시겠습니까?", "경고", MessageBoxButtons.YesNo) ==
+                    DialogResult.No)
+                {
+                    return;
+                }
+            }
 
             logTextBox.AppendText($"{testResult}에서 크롤링을 시작합니다.");
 

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ArcaliveCrawler.Utils;
+using Crawler;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace ArcaliveCrawler
@@ -89,6 +90,36 @@ namespace ArcaliveCrawler
                 StartPosition = FormStartPosition.CenterParent
             };
             f.ShowDialog();
+        }
+
+        private void ButtonMergeDataFiles_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog
+            {
+                DefaultExt = "dat",
+                Title = "크롤링 데이터 파일 여러 개를 선택해주세요.",
+                Filter = "크롤링 데이터 파일 (*.dat)|*.dat",
+                Multiselect = true
+            };
+            if (openFile.ShowDialog() != DialogResult.OK) return;
+            var posts = new List<PostInfo>();
+            foreach (var fileName in openFile.FileNames)
+            {
+                posts.AddRange(DataFileUtility.DeserializePosts(fileName));
+            }
+
+            posts = posts.OrderByDescending(x => x.dt).ToList();
+
+            SaveFileDialog saveFile = new SaveFileDialog
+            {
+                DefaultExt = "dat",
+                Title = "크롤링 데이터 파일을 저장할 위치를 선택해주세요.",
+                Filter = "크롤링 데이터 파일 (*.dat)|*.dat",
+            };
+            if (saveFile.ShowDialog() == DialogResult.OK)
+            {
+                DataFileUtility.SerializePosts(posts, saveFile.FileName);
+            }
         }
     }
 }

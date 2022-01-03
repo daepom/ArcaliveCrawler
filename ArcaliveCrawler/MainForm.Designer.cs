@@ -36,6 +36,7 @@ namespace ArcaliveCrawler
             this.builtTimeLabel = new System.Windows.Forms.Label();
             this.ArcaconUseStatExportButton = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.ButtonMergeDataFiles = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // CrawlButton
@@ -109,11 +110,22 @@ namespace ArcaliveCrawler
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // ButtonMergeDataFiles
+            // 
+            this.ButtonMergeDataFiles.Location = new System.Drawing.Point(12, 120);
+            this.ButtonMergeDataFiles.Name = "ButtonMergeDataFiles";
+            this.ButtonMergeDataFiles.Size = new System.Drawing.Size(118, 48);
+            this.ButtonMergeDataFiles.TabIndex = 9;
+            this.ButtonMergeDataFiles.Text = "기타3. 데이터 파일 병합";
+            this.ButtonMergeDataFiles.UseVisualStyleBackColor = true;
+            this.ButtonMergeDataFiles.Click += new System.EventHandler(this.ButtonMergeDataFiles_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(272, 270);
+            this.Controls.Add(this.ButtonMergeDataFiles);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.ArcaconUseStatExportButton);
             this.Controls.Add(this.builtTimeLabel);
@@ -138,6 +150,7 @@ namespace ArcaliveCrawler
         private System.Windows.Forms.Label builtTimeLabel;
         private System.Windows.Forms.Button ArcaconUseStatExportButton;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button ButtonMergeDataFiles;
     }
 }
 

@@ -67,11 +67,11 @@ namespace ArcaliveCrawler.Utils
                 {
                     Step(arcacons.Count);
                     // 메모이제이션
-                    foreach (var arcaconPack in from arcaconPack in arcaconPacks from packArcacon in arcaconPack.arcacons where currentArcacon.address == packArcacon.address select arcaconPack)
-                    {
-                        memoDic.Add(currentArcacon, arcaconPack.id);
-                        goto OUT;
-                    }
+                    //foreach (var arcaconPack in from arcaconPack in arcaconPacks from packArcacon in arcaconPack.arcacons where currentArcacon.address == packArcacon.address select arcaconPack)
+                    //{
+                    //    memoDic.Add(currentArcacon, arcaconPack.id);
+                    //    goto OUT;
+                    //}
 
                     // 처음보는 아카콘일 경우
 
@@ -86,30 +86,30 @@ namespace ArcaliveCrawler.Utils
                         continue;
 
                     // 메모
-                    var arcaconNodesImg = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/div/img");
-                    var arcaconNodesVid = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/div/video");
-                    var newArcaconPack = new ArcaconPack(number);
-                    if (arcaconNodesImg != null)
-                    {
-                        foreach (var arcaconNode in arcaconNodesImg)
-                        {
-                            var src = arcaconNode.Attributes["src"].Value;
-                            var newArcacon = new Arcacon(src);
-                            newArcaconPack.arcacons.Add(newArcacon);
-                        }
-                    }
-                    if (arcaconNodesVid != null)
-                    {
-                        foreach (var arcaconNode in arcaconNodesVid)
-                        {
-                            var src = arcaconNode.Attributes["src"].Value.EndsWith("mp4")
-                                ? arcaconNode.Attributes["src"].Value + ".gif"
-                                : arcaconNode.Attributes["src"].Value;
-                            var newArcacon = new Arcacon(src);
-                            newArcaconPack.arcacons.Add(newArcacon);
-                        }
-                    }
-                    arcaconPacks.Add(newArcaconPack);
+                    //var arcaconNodesImg = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/div/img");
+                    //var arcaconNodesVid = doc.DocumentNode.SelectNodes("//div[contains(@class, 'article-body')]/div/video");
+                    //var newArcaconPack = new ArcaconPack(number);
+                    //if (arcaconNodesImg != null)
+                    //{
+                    //    foreach (var arcaconNode in arcaconNodesImg)
+                    //    {
+                    //        var src = arcaconNode.Attributes["src"].Value;
+                    //        var newArcacon = new Arcacon(src);
+                    //        newArcaconPack.arcacons.Add(newArcacon);
+                    //    }
+                    //}
+                    //if (arcaconNodesVid != null)
+                    //{
+                    //    foreach (var arcaconNode in arcaconNodesVid)
+                    //    {
+                    //        var src = arcaconNode.Attributes["src"].Value.EndsWith("mp4")
+                    //            ? arcaconNode.Attributes["src"].Value + ".gif"
+                    //            : arcaconNode.Attributes["src"].Value;
+                    //        var newArcacon = new Arcacon(src);
+                    //        newArcaconPack.arcacons.Add(newArcacon);
+                    //    }
+                    //}
+                    //arcaconPacks.Add(newArcaconPack);
                 }
 
                 OUT:;
